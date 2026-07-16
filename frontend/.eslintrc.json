@@ -1,0 +1,4 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript", "prettier"],
+  "ignorePatterns": ["next-env.d.ts", "postcss.config.js", "tailwind.config.js"]
+}

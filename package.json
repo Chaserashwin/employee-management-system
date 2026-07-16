@@ -1,0 +1,24 @@
+{
+  "name": "employee-management-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready foundation for an Employee Management System monorepo.",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n frontend,backend -c cyan,green \"npm run dev --workspace frontend\" \"npm run dev --workspace backend\"",
+    "frontend": "npm run dev --workspace frontend",
+    "backend": "npm run dev --workspace backend",
+    "build": "npm run build --workspace frontend && npm run build --workspace backend",
+    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "prettier": "^3.3.3"
+  }
+}
