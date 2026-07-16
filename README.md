@@ -57,6 +57,7 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/ems
 JWT_SECRET=replace-with-a-secure-secret
 NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
 ```
 
 ## Installation
@@ -136,7 +137,7 @@ Backend on Render:
 
 - Build command: `npm install && npm run build --workspace backend`
 - Start command: `npm run start --workspace backend`
-- Environment: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`
+- Environment: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`, `CORS_ORIGIN=<frontend-url>`
 
 Database on MongoDB Atlas:
 
@@ -155,7 +156,9 @@ See [docs/API.md](docs/API.md).
 - JWT secrets are loaded from environment variables.
 - Passwords are never returned from APIs.
 - Helmet secures HTTP headers.
+- Production CORS is restricted through `CORS_ORIGIN`.
 - RBAC middleware protects privileged routes.
+- Only SUPER_ADMIN can change roles, assign managers, delete employees, or restore deleted employees.
 - Employee manager assignment prevents circular reporting.
 
 ## Future Improvements

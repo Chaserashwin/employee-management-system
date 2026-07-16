@@ -18,7 +18,12 @@ import {
 } from "../controllers/employee.controller";
 import { authenticate, authorize, PERMISSIONS } from "../middlewares/auth.middleware";
 import { uploadProfileImage } from "../middlewares/upload.middleware";
-import { validateBody, validateParams, validateQuery } from "../middlewares/validate.middleware";
+import {
+  validateBody,
+  validateBodyOrUploadedFile,
+  validateParams,
+  validateQuery,
+} from "../middlewares/validate.middleware";
 import {
   createEmployeeSchema,
   employeeIdParamSchema,
@@ -44,7 +49,7 @@ employeeRouter.patch(
   "/me",
   authorize(PERMISSIONS.EMPLOYEE_UPDATE_OWN),
   uploadProfileImage,
-  validateBody(updateEmployeeSchema),
+  validateBodyOrUploadedFile(updateEmployeeSchema),
   updateMyEmployeeProfile,
 );
 employeeRouter.get(
@@ -75,7 +80,7 @@ employeeRouter.put(
   authorize(PERMISSIONS.EMPLOYEE_UPDATE),
   validateParams(employeeIdParamSchema),
   uploadProfileImage,
-  validateBody(updateEmployeeSchema),
+  validateBodyOrUploadedFile(updateEmployeeSchema),
   updateEmployee,
 );
 

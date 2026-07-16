@@ -3,7 +3,7 @@ import "./types/express";
 import path from "node:path";
 
 import compression from "compression";
-import cors from "cors";
+import cors, { type CorsOptions } from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -19,11 +19,14 @@ import { searchRouter } from "./routes/search.routes";
 
 export const createApp = () => {
   const app = express();
+  const corsOptions: CorsOptions = {
+    origin: env.corsOrigins ?? (env.nodeEnv === "production" ? false : true),
+  };
 
   app.disable("x-powered-by");
 
   app.use(helmet());
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.use(compression());
   app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
   app.use(express.json({ limit: "1mb" }));

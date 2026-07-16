@@ -37,7 +37,21 @@ const parsePort = (value: string | undefined) => {
   return port;
 };
 
+const parseCorsOrigins = (value: string | undefined) => {
+  const normalizedValue = normalizeOptionalValue(value);
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  return normalizedValue
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+};
+
 export const env = Object.freeze({
+  corsOrigins: parseCorsOrigins(process.env.CORS_ORIGIN),
   jwtSecret: normalizeOptionalValue(process.env.JWT_SECRET),
   mongodbUri: normalizeOptionalValue(process.env.MONGODB_URI),
   nodeEnv: parseNodeEnvironment(process.env.NODE_ENV),

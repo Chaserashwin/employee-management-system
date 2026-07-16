@@ -79,7 +79,7 @@ export function OrganizationPage() {
                   <div className="min-w-0">
                     <h2 className="truncate text-lg font-semibold">{activeNode.name}</h2>
                     <p className="truncate text-sm text-muted-foreground">
-                      {activeNode.employeeId} · {activeNode.designation}
+                      {activeNode.employeeId} - {activeNode.designation}
                     </p>
                   </div>
                 </div>

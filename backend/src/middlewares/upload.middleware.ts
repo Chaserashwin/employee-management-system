@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 
 import multer from "multer";
 
@@ -8,6 +9,11 @@ import { AppError } from "../utils/app-error";
 
 const EMPLOYEE_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "employees");
 const MAX_PROFILE_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+const ALLOWED_PROFILE_IMAGE_MIME_TYPES = new Map([
+  ["image/jpeg", ".jpg"],
+  ["image/png", ".png"],
+  ["image/webp", ".webp"],
+]);
 
 fs.mkdirSync(EMPLOYEE_UPLOAD_DIR, { recursive: true });
 
@@ -16,16 +22,21 @@ const storage = multer.diskStorage({
     callback(null, EMPLOYEE_UPLOAD_DIR);
   },
   filename(_request, file, callback) {
-    const extension = path.extname(file.originalname).toLowerCase();
-    const filename = `${Date.now()}-${crypto.randomUUID()}${extension}`;
+    const extension = ALLOWED_PROFILE_IMAGE_MIME_TYPES.get(file.mimetype) ?? ".bin";
+    const filename = `${Date.now()}-${randomUUID()}${extension}`;
 
     callback(null, filename);
   },
 });
 
 const fileFilter: multer.Options["fileFilter"] = (_request, file, callback) => {
-  if (!file.mimetype.startsWith("image/")) {
-    callback(new AppError("Profile image must be an image file.", HTTP_STATUS.BAD_REQUEST));
+  if (!ALLOWED_PROFILE_IMAGE_MIME_TYPES.has(file.mimetype)) {
+    callback(
+      new AppError(
+        "Profile image must be a JPG, PNG, or WebP file.",
+        HTTP_STATUS.BAD_REQUEST,
+      ),
+    );
     return;
   }
 

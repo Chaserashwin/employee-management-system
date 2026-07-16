@@ -19,6 +19,9 @@ services:
       MONGODB_URI: mongodb://mongo:27017/ems
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: production
+      CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - backend-uploads:/app/backend/uploads
     depends_on:
       - mongo
 
@@ -26,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5000
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -36,3 +41,4 @@ services:
 
 volumes:
   mongo-data:
+  backend-uploads:

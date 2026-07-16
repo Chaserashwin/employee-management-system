@@ -42,7 +42,8 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
     employee?.id ?? "",
     Boolean(employee && (role === "SUPER_ADMIN" || role === "HR")),
   );
-  const canEdit = role === "SUPER_ADMIN" || role === "HR";
+  const canEdit =
+    role === "SUPER_ADMIN" || (role === "HR" && employee?.role !== "SUPER_ADMIN");
   const canAssignManager = role === "SUPER_ADMIN";
   const canManageRole = role === "SUPER_ADMIN";
 
@@ -184,7 +185,7 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{chainEmployee.name}</p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {chainEmployee.employeeId} · {chainEmployee.designation}
+                        {chainEmployee.employeeId} - {chainEmployee.designation}
                       </p>
                     </div>
                     <Badge variant={index === chainQuery.data.length - 1 ? "default" : "muted"}>

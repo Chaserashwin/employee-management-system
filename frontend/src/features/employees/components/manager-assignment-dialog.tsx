@@ -59,7 +59,7 @@ export function ManagerAssignmentDialog({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{candidate.name}</span>
         <span className="block truncate text-xs text-muted-foreground">
-          {candidate.employeeId} · {candidate.designation}
+          {candidate.employeeId} - {candidate.designation}
         </span>
       </span>
     </button>
@@ -67,9 +67,16 @@ export function ManagerAssignmentDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl rounded-lg border bg-background p-5 shadow-lg" role="dialog">
+      <div
+        className="w-full max-w-xl rounded-lg border bg-background p-5 shadow-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="manager-dialog-title"
+      >
         <div className="space-y-1">
-          <h2 className="text-base font-semibold">Assign manager</h2>
+          <h2 id="manager-dialog-title" className="text-base font-semibold">
+            Assign manager
+          </h2>
           <p className="text-sm text-muted-foreground">
             Choose an active employee who will manage {employee.name}.
           </p>
@@ -82,6 +89,7 @@ export function ManagerAssignmentDialog({
             onChange={(event) => setSearch(event.target.value)}
             className="pl-9"
             placeholder="Search candidates"
+            aria-label="Search manager candidates"
           />
         </div>
 

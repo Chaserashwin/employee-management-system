@@ -49,7 +49,7 @@ export function GlobalSearch() {
                 >
                   <span className="block font-medium">{employee.name}</span>
                   <span className="block text-xs text-muted-foreground">
-                    {employee.employeeId} · {employee.email} · {employee.department}
+                    {employee.employeeId} - {employee.email} - {employee.department}
                   </span>
                 </Link>
               ))}

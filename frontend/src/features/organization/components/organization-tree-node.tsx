@@ -53,7 +53,7 @@ export function OrganizationTreeNodeView({
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">{node.name}</span>
             <span className="block truncate text-xs text-muted-foreground">
-              {node.employeeId} · {node.designation}
+              {node.employeeId} - {node.designation}
             </span>
           </span>
         </button>

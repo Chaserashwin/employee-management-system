@@ -139,7 +139,7 @@ export function DashboardPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">{employee.name}</span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {employee.employeeId} · {employee.department}
+                        {employee.employeeId} - {employee.department}
                       </span>
                     </span>
                     <span className="text-right">

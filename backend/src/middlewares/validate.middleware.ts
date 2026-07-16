@@ -22,6 +22,18 @@ export const validateBody =
     next();
   };
 
+export const validateBodyOrUploadedFile =
+  (schema: ZodTypeAny): RequestHandler =>
+  (request, _response, next) => {
+    if (request.file && Object.keys(request.body as Record<string, unknown>).length === 0) {
+      request.body = {};
+      next();
+      return;
+    }
+
+    validateBody(schema)(request, _response, next);
+  };
+
 export const validateQuery =
   (schema: ZodTypeAny): RequestHandler =>
   (request, _response, next) => {

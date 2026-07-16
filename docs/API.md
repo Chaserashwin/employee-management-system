@@ -34,7 +34,7 @@ Returns employee records with pagination.
 Returns the authenticated user's employee profile.
 
 ### PATCH `/api/employees/me`
-Roles: `EMPLOYEE`
+Roles: `SUPER_ADMIN`, `HR`, `EMPLOYEE`
 
 Updates permitted personal fields and profile image.
 
@@ -67,11 +67,11 @@ Roles: `SUPER_ADMIN`, `HR`
 Request: `{ "status": "ACTIVE" | "INACTIVE" }`
 
 ### PATCH `/api/employees/:id/role`
-Roles: `SUPER_ADMIN`, limited `HR`
+Roles: `SUPER_ADMIN`
 
 Request: `{ "role": "SUPER_ADMIN" | "HR" | "EMPLOYEE" }`
 
-Protections: SUPER_ADMIN cannot downgrade themselves; HR cannot assign SUPER_ADMIN or modify SUPER_ADMIN accounts.
+Protections: SUPER_ADMIN cannot downgrade themselves.
 
 ### PATCH `/api/employees/:id/manager`
 Roles: `SUPER_ADMIN`
@@ -123,3 +123,11 @@ Searches employee name, employee ID, email, and department.
   "data": null
 }
 ```
+
+## Uploads
+
+Profile images are accepted as multipart `profileImage` files up to 2 MB. Supported formats are JPG, PNG, and WebP.
+
+## CORS
+
+Production CORS is controlled by the backend `CORS_ORIGIN` environment variable. Use a comma-separated list for multiple allowed frontend origins.

@@ -162,12 +162,35 @@ const assertHrCanModifyEmployee = (employee: EmployeeDocument, requester: Authen
   }
 };
 
-const assertHrCanUseRole = (
-  role: EmployeeDocument["role"] | undefined,
+const assertHrCanCreateEmployee = (payload: EmployeePayload, requester: AuthenticatedUser) => {
+  if (requester.role !== "HR") {
+    return;
+  }
+
+  if (payload.role !== "EMPLOYEE") {
+    throw new AppError("HR can only create EMPLOYEE records.", HTTP_STATUS.FORBIDDEN);
+  }
+
+  if (payload.manager !== undefined && payload.manager !== null) {
+    throw new AppError("HR cannot assign managers.", HTTP_STATUS.FORBIDDEN);
+  }
+};
+
+const assertHrCanUpdateEmployeePayload = (
+  employee: EmployeeDocument,
+  payload: EmployeeUpdatePayload,
   requester: AuthenticatedUser,
 ) => {
-  if (requester.role === "HR" && role === "SUPER_ADMIN") {
-    throw new AppError("HR cannot assign SUPER_ADMIN role.", HTTP_STATUS.FORBIDDEN);
+  if (requester.role !== "HR") {
+    return;
+  }
+
+  if (payload.role !== undefined && payload.role !== employee.role) {
+    throw new AppError("HR cannot change employee roles.", HTTP_STATUS.FORBIDDEN);
+  }
+
+  if (payload.manager !== undefined) {
+    throw new AppError("HR cannot assign managers.", HTTP_STATUS.FORBIDDEN);
   }
 };
 
@@ -229,7 +252,7 @@ export const getOwnEmployeeProfile = async (requester: AuthenticatedUser) => {
 };
 
 export const addEmployee = async (payload: EmployeePayload, requester: AuthenticatedUser) => {
-  assertHrCanUseRole(payload.role, requester);
+  assertHrCanCreateEmployee(payload, requester);
 
   try {
     const employee = await createEmployee(payload);
@@ -251,7 +274,7 @@ export const editEmployee = async (
 ) => {
   const currentEmployee = await getEmployeeOrThrow(id);
   assertHrCanModifyEmployee(currentEmployee, requester);
-  assertHrCanUseRole(payload.role, requester);
+  assertHrCanUpdateEmployeePayload(currentEmployee, payload, requester);
 
   try {
     const employee = await updateEmployeeById(id, payload);
@@ -340,7 +363,6 @@ export const changeEmployeeRole = async (
 ) => {
   const currentEmployee = await getEmployeeOrThrow(id);
   assertHrCanModifyEmployee(currentEmployee, requester);
-  assertHrCanUseRole(role, requester);
 
   if (
     requester.role === "SUPER_ADMIN" &&
