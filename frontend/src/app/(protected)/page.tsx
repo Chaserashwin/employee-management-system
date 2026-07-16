@@ -1,3 +1,7 @@
+import { Users } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/constants/app";
 
 export default function HomePage() {
@@ -11,9 +15,15 @@ export default function HomePage() {
           {APP_NAME}
         </h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Authentication is active. Future dashboard, employee, hierarchy, and reporting
-          modules can be added here without changing the route protection foundation.
+          Authentication and employee management are active. Dashboard analytics and
+          organization hierarchy remain outside this phase.
         </p>
+        <Button asChild>
+          <Link href="/employees">
+            <Users className="size-4" aria-hidden="true" />
+            Open Employees
+          </Link>
+        </Button>
       </div>
     </section>
   );

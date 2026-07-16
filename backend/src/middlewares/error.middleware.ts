@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from "express";
+import multer from "multer";
 
 import { env } from "../config/env";
 import { HTTP_STATUS } from "../constants/http-status";
@@ -19,18 +20,23 @@ const isBodyParserError = (error: unknown): error is BodyParserError => {
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
   const isAppError = error instanceof AppError;
   const isParseError = isBodyParserError(error);
+  const isUploadError = error instanceof multer.MulterError;
   const statusCode = isAppError
     ? error.statusCode
     : isParseError
       ? HTTP_STATUS.BAD_REQUEST
-      : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      : isUploadError
+        ? HTTP_STATUS.BAD_REQUEST
+        : HTTP_STATUS.INTERNAL_SERVER_ERROR;
   const message = isAppError
     ? error.message
     : isParseError
       ? "Invalid JSON payload."
-      : "Internal server error";
+      : isUploadError
+        ? error.message
+        : "Internal server error";
 
-  if ((!isAppError || !error.isOperational) && !isParseError) {
+  if ((!isAppError || !error.isOperational) && !isParseError && !isUploadError) {
     logger.error(message, error);
   }
 

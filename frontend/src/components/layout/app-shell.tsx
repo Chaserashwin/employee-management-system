@@ -1,6 +1,8 @@
 "use client";
 
-import { Building2, CircleDot, Layers3, LogOut, PanelLeft, Settings } from "lucide-react";
+import { Building2, CircleDot, LogOut, PanelLeft, Settings, Users } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,13 +13,13 @@ import type { NavigationItem } from "@/types/navigation";
 const navigationItems: NavigationItem[] = [
   {
     title: "Workspace",
-    href: "#",
+    href: "/",
     icon: CircleDot,
   },
   {
-    title: "Modules",
-    href: "#",
-    icon: Layers3,
+    title: "Employees",
+    href: "/employees",
+    icon: Users,
   },
   {
     title: "Settings",
@@ -32,6 +34,7 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const { logout, user } = useAuth();
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-muted/30 text-foreground">
@@ -51,14 +54,18 @@ export function AppShell({ children }: AppShellProps) {
             const Icon = item.icon;
 
             return (
-              <a
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              <Link
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground"
+                }`}
                 href={item.href}
                 key={item.title}
               >
                 <Icon className="size-4" aria-hidden="true" />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -69,7 +76,7 @@ export function AppShell({ children }: AppShellProps) {
           <PanelLeft className="size-5 text-muted-foreground md:hidden" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">Application Shell</p>
-            <p className="truncate text-xs text-muted-foreground">Phase 1 foundation</p>
+            <p className="truncate text-xs text-muted-foreground">Employee operations</p>
           </div>
           <div className="hidden min-w-0 text-right sm:block">
             <p className="truncate text-sm font-medium">{user?.name}</p>

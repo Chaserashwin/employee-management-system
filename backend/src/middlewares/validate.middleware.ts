@@ -21,3 +21,31 @@ export const validateBody =
     request.body = validationResult.data;
     next();
   };
+
+export const validateQuery =
+  (schema: ZodTypeAny): RequestHandler =>
+  (request, _response, next) => {
+    const validationResult = schema.safeParse(request.query);
+
+    if (!validationResult.success) {
+      next(new AppError(formatValidationError(validationResult.error), HTTP_STATUS.BAD_REQUEST));
+      return;
+    }
+
+    request.query = validationResult.data as typeof request.query;
+    next();
+  };
+
+export const validateParams =
+  (schema: ZodTypeAny): RequestHandler =>
+  (request, _response, next) => {
+    const validationResult = schema.safeParse(request.params);
+
+    if (!validationResult.success) {
+      next(new AppError(formatValidationError(validationResult.error), HTTP_STATUS.BAD_REQUEST));
+      return;
+    }
+
+    request.params = validationResult.data as typeof request.params;
+    next();
+  };

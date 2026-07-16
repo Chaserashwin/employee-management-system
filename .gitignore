@@ -9,6 +9,7 @@ out/
 dist/
 build/
 coverage/
+backend/uploads/
 
 *.log
 npm-debug.log*

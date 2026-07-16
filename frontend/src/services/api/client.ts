@@ -9,9 +9,6 @@ let unauthorizedHandler: UnauthorizedHandler | undefined;
 
 export const apiClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 const isLoginRequest = (url: string | undefined) => {
