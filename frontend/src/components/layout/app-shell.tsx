@@ -1,7 +1,11 @@
-import { Building2, CircleDot, Layers3, PanelLeft, Settings } from "lucide-react";
+"use client";
+
+import { Building2, CircleDot, Layers3, LogOut, PanelLeft, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/constants/app";
+import { useAuth } from "@/hooks/use-auth";
 import type { NavigationItem } from "@/types/navigation";
 
 const navigationItems: NavigationItem[] = [
@@ -27,6 +31,8 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
+  const { logout, user } = useAuth();
+
   return (
     <div className="min-h-screen bg-muted/30 text-foreground">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r bg-background md:flex">
@@ -65,6 +71,13 @@ export function AppShell({ children }: AppShellProps) {
             <p className="truncate text-sm font-semibold">Application Shell</p>
             <p className="truncate text-xs text-muted-foreground">Phase 1 foundation</p>
           </div>
+          <div className="hidden min-w-0 text-right sm:block">
+            <p className="truncate text-sm font-medium">{user?.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{user?.role}</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => void logout()} aria-label="Sign out">
+            <LogOut className="size-4" aria-hidden="true" />
+          </Button>
         </header>
 
         <main className="p-4 sm:p-6">{children}</main>

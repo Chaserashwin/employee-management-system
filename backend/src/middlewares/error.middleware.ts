@@ -7,12 +7,30 @@ import { serializeError } from "../utils/error";
 import { logger } from "../utils/logger";
 import { createErrorResponse } from "../utils/response";
 
+type BodyParserError = SyntaxError & {
+  status?: number;
+  type?: string;
+};
+
+const isBodyParserError = (error: unknown): error is BodyParserError => {
+  return error instanceof SyntaxError && (error as BodyParserError).status === HTTP_STATUS.BAD_REQUEST;
+};
+
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
   const isAppError = error instanceof AppError;
-  const statusCode = isAppError ? error.statusCode : HTTP_STATUS.INTERNAL_SERVER_ERROR;
-  const message = isAppError ? error.message : "Internal server error";
+  const isParseError = isBodyParserError(error);
+  const statusCode = isAppError
+    ? error.statusCode
+    : isParseError
+      ? HTTP_STATUS.BAD_REQUEST
+      : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  const message = isAppError
+    ? error.message
+    : isParseError
+      ? "Invalid JSON payload."
+      : "Internal server error";
 
-  if (!isAppError || !error.isOperational) {
+  if ((!isAppError || !error.isOperational) && !isParseError) {
     logger.error(message, error);
   }
 
