@@ -45,6 +45,11 @@ export const employeeService = {
 
     return response.data.data;
   },
+  async getMyProfile() {
+    const response = await apiClient.get<ApiResponse<Employee>>("/api/employees/me");
+
+    return response.data.data;
+  },
   async createEmployee(payload: EmployeeFormPayload) {
     const response = await apiClient.post<ApiResponse<Employee>>(
       "/api/employees",

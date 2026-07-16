@@ -77,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       authTokenStorage.setToken(loginResult.token);
       setUser(loginResult.user);
-      router.replace("/");
+      router.replace(loginResult.user.role === "EMPLOYEE" ? "/profile" : "/");
     },
     [router],
   );

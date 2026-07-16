@@ -109,7 +109,12 @@ export const findEmployees = async (query: EmployeeListQuery, accessFilter: Empl
 
   if (query.search) {
     const searchRegex = new RegExp(escapeRegex(query.search), "i");
-    filter.$or = [{ name: searchRegex }, { email: searchRegex }];
+    filter.$or = [
+      { name: searchRegex },
+      { email: searchRegex },
+      { employeeId: searchRegex },
+      { department: searchRegex },
+    ];
   }
 
   if (query.department) {
@@ -140,4 +145,21 @@ export const findEmployees = async (query: EmployeeListQuery, accessFilter: Empl
     employees,
     totalRecords,
   };
+};
+
+export const searchEmployees = (search: string, limit = 8) => {
+  const searchRegex = new RegExp(escapeRegex(search), "i");
+
+  return EmployeeModel.find({
+    deleted: false,
+    $or: [
+      { name: searchRegex },
+      { email: searchRegex },
+      { employeeId: searchRegex },
+      { department: searchRegex },
+    ],
+  })
+    .sort({ name: 1, _id: 1 })
+    .limit(limit)
+    .exec();
 };

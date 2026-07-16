@@ -12,8 +12,10 @@ import { env } from "./config/env";
 import { errorHandler } from "./middlewares/error.middleware";
 import { notFoundHandler } from "./middlewares/not-found.middleware";
 import { authRouter } from "./routes/auth.routes";
+import { dashboardRouter } from "./routes/dashboard.routes";
 import { employeeRouter } from "./routes/employee.routes";
 import { organizationRouter } from "./routes/organization.routes";
+import { searchRouter } from "./routes/search.routes";
 
 export const createApp = () => {
   const app = express();
@@ -29,8 +31,10 @@ export const createApp = () => {
   app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api/auth", authRouter);
+  app.use("/api/dashboard", dashboardRouter);
   app.use("/api/employees", employeeRouter);
   app.use("/api/organization", organizationRouter);
+  app.use("/api/search", searchRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

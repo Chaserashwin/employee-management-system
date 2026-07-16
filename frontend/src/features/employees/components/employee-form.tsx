@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   employeeFormSchema,
   type EmployeeFormValues,
 } from "@/features/employees/validation/employee-form.schema";
+import { getEmployeeImageUrl } from "@/features/employees/utils/employee-format";
 import { useAuth } from "@/hooks/use-auth";
 import type { Employee } from "@/types/employee";
 
@@ -53,14 +54,33 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
     handleSubmit,
     register,
     reset,
+    watch,
   } = useForm<EmployeeFormValues>({
     defaultValues: getDefaultValues(employee),
     resolver: zodResolver(employeeFormSchema),
   });
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(() =>
+    employee ? getEmployeeImageUrl(employee) : undefined,
+  );
+  const selectedProfileImage = watch("profileImage");
 
   useEffect(() => {
     reset(getDefaultValues(employee));
+    setPreviewUrl(employee ? getEmployeeImageUrl(employee) : undefined);
   }, [employee, reset]);
+
+  useEffect(() => {
+    const selectedFile = selectedProfileImage?.item(0);
+
+    if (!selectedFile) {
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [selectedProfileImage]);
 
   return (
     <Card>
@@ -178,6 +198,14 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
 
           <div className="space-y-2">
             <Label htmlFor="profileImage">Profile Image</Label>
+            {previewUrl ? (
+              <div
+                aria-label="Profile image preview"
+                className="size-20 rounded-md border bg-cover bg-center"
+                role="img"
+                style={{ backgroundImage: `url("${previewUrl}")` }}
+              />
+            ) : null}
             <Input id="profileImage" type="file" accept="image/*" {...register("profileImage")} />
           </div>
 

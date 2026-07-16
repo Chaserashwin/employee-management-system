@@ -21,6 +21,13 @@ export const employeeQueryKeys = {
   reportees: (id: string) => [...employeeQueryKeys.all, "reportees", id] as const,
 };
 
+export function useMyEmployeeProfile() {
+  return useQuery({
+    queryFn: () => employeeService.getMyProfile(),
+    queryKey: [...employeeQueryKeys.all, "me"] as const,
+  });
+}
+
 export function useEmployees(params: EmployeeListParams, enabled = true) {
   return useQuery({
     enabled,

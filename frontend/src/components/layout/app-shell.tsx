@@ -1,21 +1,32 @@
 "use client";
 
-import { Building2, CircleDot, GitFork, LogOut, PanelLeft, Settings, Users } from "lucide-react";
+import {
+  Building2,
+  CircleDot,
+  GitFork,
+  LogOut,
+  PanelLeft,
+  Settings,
+  UserRound,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ThemeToggle } from "@/components/common/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/constants/app";
+import { GlobalSearch } from "@/features/search/components/global-search";
 import { useAuth } from "@/hooks/use-auth";
 import type { NavigationItem } from "@/types/navigation";
 
 const navigationItems: NavigationItem[] = [
   {
-    title: "Workspace",
+    title: "Dashboard",
     href: "/",
     icon: CircleDot,
-    roles: ["SUPER_ADMIN", "HR", "EMPLOYEE"],
+    roles: ["SUPER_ADMIN", "HR"],
   },
   {
     title: "Employees",
@@ -30,10 +41,16 @@ const navigationItems: NavigationItem[] = [
     roles: ["SUPER_ADMIN", "HR"],
   },
   {
+    title: "Profile",
+    href: "/profile",
+    icon: UserRound,
+    roles: ["SUPER_ADMIN", "HR", "EMPLOYEE"],
+  },
+  {
     title: "Settings",
-    href: "#",
+    href: "/settings",
     icon: Settings,
-    roles: ["SUPER_ADMIN"],
+    roles: ["SUPER_ADMIN", "HR", "EMPLOYEE"],
   },
 ];
 
@@ -44,6 +61,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { logout, role, user } = useAuth();
   const pathname = usePathname();
+  const canUseGlobalSearch = role === "SUPER_ADMIN" || role === "HR";
   const visibleNavigationItems = navigationItems.filter((item) =>
     role ? item.roles.includes(role) : false,
   );
@@ -90,6 +108,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="md:pl-64">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
           <PanelLeft className="size-5 text-muted-foreground md:hidden" aria-hidden="true" />
+          {canUseGlobalSearch ? <GlobalSearch /> : null}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">Application Shell</p>
             <p className="truncate text-xs text-muted-foreground">Employee operations</p>
@@ -98,6 +117,7 @@ export function AppShell({ children }: AppShellProps) {
             <p className="truncate text-sm font-medium">{user?.name}</p>
             <p className="truncate text-xs text-muted-foreground">{user?.role}</p>
           </div>
+          <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={() => void logout()} aria-label="Sign out">
             <LogOut className="size-4" aria-hidden="true" />
           </Button>
