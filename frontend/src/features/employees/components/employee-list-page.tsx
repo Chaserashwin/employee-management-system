@@ -4,6 +4,7 @@ import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { AccessDenied } from "@/components/common/access-denied";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,13 +58,17 @@ export function EmployeeListPage() {
     [debouncedSearch, department, employeeRole, limit, page, sortBy, sortOrder, status],
   );
 
-  const employeesQuery = useEmployees(params);
+  const employeesQuery = useEmployees(params, role !== "EMPLOYEE");
   const deleteEmployeeMutation = useDeleteEmployee();
   const updateStatusMutation = useUpdateEmployeeStatus();
 
   const canCreate = role === "SUPER_ADMIN" || role === "HR";
   const employees = employeesQuery.data?.data ?? [];
   const pagination = employeesQuery.data?.pagination;
+
+  if (role === "EMPLOYEE") {
+    return <AccessDenied />;
+  }
 
   const resetPage = () => setPage(1);
 

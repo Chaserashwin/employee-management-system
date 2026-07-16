@@ -5,7 +5,11 @@ import type {
   EmployeeFormPayload,
   EmployeeListParams,
   EmployeeListResult,
+  EmployeeManagerPayload,
+  EmployeeRolePayload,
+  EmployeeSummary,
   EmployeeStatusPayload,
+  ReporteesResult,
 } from "@/types/employee";
 
 const toEmployeeFormData = (payload: EmployeeFormPayload) => {
@@ -62,10 +66,52 @@ export const employeeService = {
 
     return response.data.data;
   },
+  async restoreEmployee(id: string) {
+    const response = await apiClient.patch<ApiResponse<Employee>>(`/api/employees/${id}/restore`);
+
+    return response.data.data;
+  },
   async updateEmployeeStatus(id: string, payload: EmployeeStatusPayload) {
     const response = await apiClient.patch<ApiResponse<Employee>>(
       `/api/employees/${id}/status`,
       payload,
+    );
+
+    return response.data.data;
+  },
+  async updateEmployeeRole(id: string, payload: EmployeeRolePayload) {
+    const response = await apiClient.patch<ApiResponse<Employee>>(
+      `/api/employees/${id}/role`,
+      payload,
+    );
+
+    return response.data.data;
+  },
+  async updateEmployeeManager(id: string, payload: EmployeeManagerPayload) {
+    const response = await apiClient.patch<ApiResponse<Employee>>(
+      `/api/employees/${id}/manager`,
+      payload,
+    );
+
+    return response.data.data;
+  },
+  async getManagerCandidates(id: string) {
+    const response = await apiClient.get<ApiResponse<EmployeeSummary[]>>(
+      `/api/employees/${id}/manager-candidates`,
+    );
+
+    return response.data.data;
+  },
+  async getReportees(id: string) {
+    const response = await apiClient.get<ApiResponse<ReporteesResult>>(
+      `/api/employees/${id}/reportees`,
+    );
+
+    return response.data.data;
+  },
+  async getChain(id: string) {
+    const response = await apiClient.get<ApiResponse<EmployeeSummary[]>>(
+      `/api/employees/${id}/chain`,
     );
 
     return response.data.data;

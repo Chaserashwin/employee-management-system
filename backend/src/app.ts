@@ -13,6 +13,7 @@ import { errorHandler } from "./middlewares/error.middleware";
 import { notFoundHandler } from "./middlewares/not-found.middleware";
 import { authRouter } from "./routes/auth.routes";
 import { employeeRouter } from "./routes/employee.routes";
+import { organizationRouter } from "./routes/organization.routes";
 
 export const createApp = () => {
   const app = express();
@@ -29,6 +30,7 @@ export const createApp = () => {
 
   app.use("/api/auth", authRouter);
   app.use("/api/employees", employeeRouter);
+  app.use("/api/organization", organizationRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

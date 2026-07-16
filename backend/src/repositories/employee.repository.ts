@@ -24,8 +24,24 @@ export const findEmployeeById = (id: string) => {
   return EmployeeModel.findOne({ _id: id, deleted: false }).exec();
 };
 
+export const findEmployeeByIdIncludingDeleted = (id: string) => {
+  return EmployeeModel.findById(id).exec();
+};
+
 export const findEmployeeByEmail = (email: string) => {
   return EmployeeModel.findOne({ email, deleted: false }).exec();
+};
+
+export const findEmployeeByEmailIncludingDeleted = (email: string) => {
+  return EmployeeModel.findOne({ email }).exec();
+};
+
+export const findAllEmployees = () => {
+  return EmployeeModel.find({ deleted: false }).sort({ name: 1, _id: 1 }).exec();
+};
+
+export const findManagerCandidates = () => {
+  return EmployeeModel.find({ deleted: false, status: "ACTIVE" }).sort({ name: 1, _id: 1 }).exec();
 };
 
 export const updateEmployeeById = (id: string, payload: EmployeeUpdatePayload) => {
@@ -53,10 +69,34 @@ export const softDeleteEmployeeById = (id: string) => {
   ).exec();
 };
 
+export const restoreEmployeeById = (id: string) => {
+  return EmployeeModel.findOneAndUpdate(
+    { _id: id, deleted: true },
+    { deleted: false },
+    { new: true, runValidators: true },
+  ).exec();
+};
+
 export const updateEmployeeStatusById = (id: string, status: EmployeeDocument["status"]) => {
   return EmployeeModel.findOneAndUpdate(
     { _id: id, deleted: false },
     { status },
+    { new: true, runValidators: true },
+  ).exec();
+};
+
+export const updateEmployeeRoleById = (id: string, role: EmployeeDocument["role"]) => {
+  return EmployeeModel.findOneAndUpdate(
+    { _id: id, deleted: false },
+    { role },
+    { new: true, runValidators: true },
+  ).exec();
+};
+
+export const updateEmployeeManagerById = (id: string, managerId: string | null) => {
+  return EmployeeModel.findOneAndUpdate(
+    { _id: id, deleted: false },
+    { manager: managerId },
     { new: true, runValidators: true },
   ).exec();
 };

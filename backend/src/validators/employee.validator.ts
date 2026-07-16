@@ -50,6 +50,14 @@ export const employeeStatusSchema = z.object({
   status: z.enum(EMPLOYEE_STATUSES, "Status must be ACTIVE or INACTIVE."),
 });
 
+export const employeeRoleSchema = z.object({
+  role: z.enum(EMPLOYEE_ROLES, "Role must be SUPER_ADMIN, HR, or EMPLOYEE."),
+});
+
+export const employeeManagerSchema = z.object({
+  managerId: z.preprocess(emptyStringToUndefined, objectIdSchema.nullable().optional()),
+});
+
 export const employeeIdParamSchema = z.object({
   id: z
     .string()
@@ -71,4 +79,6 @@ export const employeeListQuerySchema = z.object({
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>;
 export type EmployeeStatusInput = z.infer<typeof employeeStatusSchema>;
+export type EmployeeRoleInput = z.infer<typeof employeeRoleSchema>;
+export type EmployeeManagerInput = z.infer<typeof employeeManagerSchema>;
 export type EmployeeListQueryInput = z.infer<typeof employeeListQuerySchema>;

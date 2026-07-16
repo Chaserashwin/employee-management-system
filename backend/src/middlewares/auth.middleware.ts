@@ -1,11 +1,22 @@
 import type { RequestHandler } from "express";
 
 import { HTTP_STATUS } from "../constants/http-status";
+import {
+  hasPermission,
+  PERMISSIONS,
+  type Permission,
+} from "../constants/permissions";
 import type { UserRole } from "../constants/user";
 import { UserModel } from "../models/user.model";
 import { AppError } from "../utils/app-error";
 import { asyncHandler } from "../utils/async-handler";
 import { verifyAuthToken } from "../utils/jwt";
+
+const USER_ROLES: UserRole[] = ["SUPER_ADMIN", "HR", "EMPLOYEE"];
+
+const isUserRole = (value: Permission | UserRole): value is UserRole => {
+  return USER_ROLES.includes(value as UserRole);
+};
 
 const parseBearerToken = (authorizationHeader: string | undefined) => {
   if (!authorizationHeader) {
@@ -49,17 +60,28 @@ export const authenticate = asyncHandler(async (request, _response, next) => {
 });
 
 export const authorize =
-  (...roles: UserRole[]): RequestHandler =>
+  (...requirements: Array<Permission | UserRole>): RequestHandler =>
   (request, _response, next) => {
     if (!request.user) {
       next(new AppError("Authentication is required.", HTTP_STATUS.UNAUTHORIZED));
       return;
     }
 
-    if (roles.length > 0 && !roles.includes(request.user.role)) {
+    const user = request.user;
+    const isAuthorized =
+      requirements.length === 0 ||
+      requirements.some((requirement) =>
+        isUserRole(requirement)
+          ? user.role === requirement
+          : hasPermission(user.role, requirement),
+      );
+
+    if (!isAuthorized) {
       next(new AppError("You are not authorized to access this resource.", HTTP_STATUS.FORBIDDEN));
       return;
     }
 
     next();
   };
+
+export { PERMISSIONS };

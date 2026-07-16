@@ -1,5 +1,19 @@
 import type { UserRole, UserStatus } from "@/types/auth";
 
+export type EmployeeSummary = {
+  department: string;
+  designation: string;
+  email: string;
+  employeeId: string;
+  id: string;
+  joiningDate: string;
+  name: string;
+  phone: string;
+  profileImage?: string;
+  role: UserRole;
+  status: UserStatus;
+};
+
 export type Employee = {
   createdAt: string;
   deleted: boolean;
@@ -9,7 +23,7 @@ export type Employee = {
   employeeId: string;
   id: string;
   joiningDate: string;
-  manager: string | null;
+  manager: EmployeeSummary | null;
   name: string;
   phone: string;
   profileImage?: string;
@@ -17,6 +31,17 @@ export type Employee = {
   salary: number;
   status: UserStatus;
   updatedAt: string;
+};
+
+export type OrganizationTreeNode = EmployeeSummary & {
+  directReporteesCount: number;
+  manager: EmployeeSummary | null;
+  reportees: OrganizationTreeNode[];
+};
+
+export type ReporteesResult = {
+  directReportees: OrganizationTreeNode[];
+  nestedReportees: OrganizationTreeNode[];
 };
 
 export type EmployeeListParams = {
@@ -57,4 +82,12 @@ export type EmployeeFormPayload = {
 
 export type EmployeeStatusPayload = {
   status: UserStatus;
+};
+
+export type EmployeeRolePayload = {
+  role: UserRole;
+};
+
+export type EmployeeManagerPayload = {
+  managerId: string | null;
 };

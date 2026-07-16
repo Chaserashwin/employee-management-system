@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, CircleDot, LogOut, PanelLeft, Settings, Users } from "lucide-react";
+import { Building2, CircleDot, GitFork, LogOut, PanelLeft, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -15,16 +15,25 @@ const navigationItems: NavigationItem[] = [
     title: "Workspace",
     href: "/",
     icon: CircleDot,
+    roles: ["SUPER_ADMIN", "HR", "EMPLOYEE"],
   },
   {
     title: "Employees",
     href: "/employees",
     icon: Users,
+    roles: ["SUPER_ADMIN", "HR"],
+  },
+  {
+    title: "Organization",
+    href: "/organization",
+    icon: GitFork,
+    roles: ["SUPER_ADMIN", "HR"],
   },
   {
     title: "Settings",
     href: "#",
     icon: Settings,
+    roles: ["SUPER_ADMIN"],
   },
 ];
 
@@ -33,8 +42,11 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const { logout, user } = useAuth();
+  const { logout, role, user } = useAuth();
   const pathname = usePathname();
+  const visibleNavigationItems = navigationItems.filter((item) =>
+    role ? item.roles.includes(role) : false,
+  );
 
   return (
     <div className="min-h-screen bg-muted/30 text-foreground">
@@ -50,13 +62,17 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         <nav aria-label="Primary navigation" className="flex-1 space-y-1 px-3 py-4">
-          {navigationItems.map((item) => {
+          {visibleNavigationItems.map((item) => {
             const Icon = item.icon;
+            const isActive =
+              item.href === "/"
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  isActive
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground"
                 }`}

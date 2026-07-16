@@ -15,6 +15,7 @@ import {
   employeeFormSchema,
   type EmployeeFormValues,
 } from "@/features/employees/validation/employee-form.schema";
+import { useAuth } from "@/hooks/use-auth";
 import type { Employee } from "@/types/employee";
 
 const toDateInputValue = (value: string | undefined) => {
@@ -45,6 +46,8 @@ type EmployeeFormProps = {
 };
 
 export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: EmployeeFormProps) {
+  const { role: currentUserRole } = useAuth();
+  const canManageRoles = currentUserRole === "SUPER_ADMIN";
   const {
     formState: { errors },
     handleSubmit,
@@ -147,16 +150,20 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
             ) : null}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select id="role" {...register("role")} aria-invalid={Boolean(errors.role)}>
-              {EMPLOYEE_ROLES.map((role) => (
-                <option value={role} key={role}>
-                  {role}
-                </option>
-              ))}
-            </Select>
-          </div>
+          {canManageRoles ? (
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select id="role" {...register("role")} aria-invalid={Boolean(errors.role)}>
+                {EMPLOYEE_ROLES.map((employeeRole) => (
+                  <option value={employeeRole} key={employeeRole}>
+                    {employeeRole}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          ) : (
+            <input type="hidden" {...register("role")} />
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>

@@ -5,6 +5,20 @@ import type {
   EmployeeStatus,
 } from "../constants/employee";
 
+export type EmployeeSummary = {
+  department: string;
+  designation: string;
+  email: string;
+  employeeId: string;
+  id: string;
+  joiningDate: Date;
+  name: string;
+  phone: string;
+  profileImage?: string;
+  role: EmployeeRole;
+  status: EmployeeStatus;
+};
+
 export type EmployeeRecord = {
   createdAt: Date;
   deleted: boolean;
@@ -14,7 +28,7 @@ export type EmployeeRecord = {
   employeeId: string;
   id: string;
   joiningDate: Date;
-  manager: string | null;
+  manager: EmployeeSummary | null;
   name: string;
   phone: string;
   profileImage?: string;
@@ -22,6 +36,17 @@ export type EmployeeRecord = {
   salary: number;
   status: EmployeeStatus;
   updatedAt: Date;
+};
+
+export type OrganizationTreeNode = EmployeeSummary & {
+  directReporteesCount: number;
+  manager: EmployeeSummary | null;
+  reportees: OrganizationTreeNode[];
+};
+
+export type ReporteesResult = {
+  directReportees: OrganizationTreeNode[];
+  nestedReportees: OrganizationTreeNode[];
 };
 
 export type EmployeeListQuery = {

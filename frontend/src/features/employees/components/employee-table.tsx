@@ -113,7 +113,7 @@ export function EmployeeTable({
                         <Eye className="size-4" aria-hidden="true" />
                       </Link>
                     </Button>
-                    {canEdit ? (
+                    {canEdit && !(currentUserRole === "HR" && employee.role === "SUPER_ADMIN") ? (
                       <Button variant="ghost" size="icon" asChild aria-label="Edit employee">
                         <Link href={`/employees/${employee.id}/edit`}>
                           <Pencil className="size-4" aria-hidden="true" />
