@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmployeeAvatar } from "@/features/employees/components/employee-avatar";
 import { formatEmployeeDate } from "@/features/employees/utils/employee-format";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import type { UserRole, UserStatus } from "@/types/auth";
 import type { Employee } from "@/types/employee";
 
@@ -32,6 +33,7 @@ export function EmployeeTable({
   const canEdit = currentUserRole === "SUPER_ADMIN" || currentUserRole === "HR";
   const canDelete = currentUserRole === "SUPER_ADMIN";
   const canChangeStatus = currentUserRole === "SUPER_ADMIN" || currentUserRole === "HR";
+  const { prefetchEmployeeRoute } = useRoutePrefetch();
 
   if (isLoading) {
     return (
@@ -109,13 +111,27 @@ export function EmployeeTable({
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">
                     <Button variant="ghost" size="icon" asChild aria-label="View employee">
-                      <Link href={`/employees/${employee.id}`}>
+                      <Link
+                        href={`/employees/${employee.id}`}
+                        onFocus={() => prefetchEmployeeRoute(employee, `/employees/${employee.id}`)}
+                        onMouseEnter={() =>
+                          prefetchEmployeeRoute(employee, `/employees/${employee.id}`)
+                        }
+                      >
                         <Eye className="size-4" aria-hidden="true" />
                       </Link>
                     </Button>
                     {canEdit && !(currentUserRole === "HR" && employee.role === "SUPER_ADMIN") ? (
                       <Button variant="ghost" size="icon" asChild aria-label="Edit employee">
-                        <Link href={`/employees/${employee.id}/edit`}>
+                        <Link
+                          href={`/employees/${employee.id}/edit`}
+                          onFocus={() =>
+                            prefetchEmployeeRoute(employee, `/employees/${employee.id}/edit`)
+                          }
+                          onMouseEnter={() =>
+                            prefetchEmployeeRoute(employee, `/employees/${employee.id}/edit`)
+                          }
+                        >
                           <Pencil className="size-4" aria-hidden="true" />
                         </Link>
                       </Button>

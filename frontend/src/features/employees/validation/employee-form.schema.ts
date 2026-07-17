@@ -18,6 +18,7 @@ export const employeeFormSchema = z.object({
   role: z.enum(EMPLOYEE_ROLES),
   status: z.enum(EMPLOYEE_STATUSES),
   profileImage: z.instanceof(FileList).optional(),
+  removeProfileImage: z.boolean().optional(),
 });
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>;

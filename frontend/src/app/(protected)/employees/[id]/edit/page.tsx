@@ -14,6 +14,7 @@ const toPayload = (values: EmployeeFormValues): EmployeeFormPayload => ({
   ...values,
   email: values.email.trim().toLowerCase(),
   profileImage: values.profileImage?.item(0) ?? undefined,
+  removeProfileImage: values.removeProfileImage ?? false,
 });
 
 export default function EditEmployeePage() {

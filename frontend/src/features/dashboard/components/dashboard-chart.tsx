@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -26,8 +27,11 @@ type DashboardChartProps = {
   type: "bar" | "line" | "pie";
 };
 
-export function DashboardChart({ data, title, type }: DashboardChartProps) {
-  const chartData = data.length > 0 ? data : [{ label: "No data", value: 0 }];
+function DashboardChartComponent({ data, title, type }: DashboardChartProps) {
+  const chartData = useMemo(
+    () => (data.length > 0 ? data : [{ label: "No data", value: 0 }]),
+    [data],
+  );
 
   return (
     <Card>
@@ -80,3 +84,5 @@ export function DashboardChart({ data, title, type }: DashboardChartProps) {
     </Card>
   );
 }
+
+export const DashboardChart = memo(DashboardChartComponent);

@@ -57,6 +57,13 @@ export const updateEmployeeById = (id: string, payload: EmployeeUpdatePayload) =
     ...payload,
   };
 
+  if (payload.profileImage === null) {
+    delete update.profileImage;
+    update.$unset = {
+      profileImage: "",
+    };
+  }
+
   if (payload.manager === undefined) {
     delete update.manager;
   } else {

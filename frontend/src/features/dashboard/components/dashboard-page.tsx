@@ -11,6 +11,7 @@ import { EmployeeAvatar } from "@/features/employees/components/employee-avatar"
 import { formatEmployeeDate } from "@/features/employees/utils/employee-format";
 import { DashboardChart } from "@/features/dashboard/components/dashboard-chart";
 import { useDashboardSummary } from "@/features/dashboard/hooks/use-dashboard";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import { getApiErrorMessage } from "@/utils/api-error";
 
 const cardConfig = [
@@ -32,6 +33,7 @@ const quickActions = [
 export function DashboardPage() {
   const dashboardQuery = useDashboardSummary();
   const dashboard = dashboardQuery.data;
+  const { prefetchEmployeeRoute, prefetchRoute } = useRoutePrefetch();
 
   return (
     <div className="space-y-6">
@@ -107,7 +109,11 @@ export function DashboardPage() {
 
                 return (
                   <Button variant="outline" className="justify-start" asChild key={action.href}>
-                    <Link href={action.href}>
+                    <Link
+                      href={action.href}
+                      onFocus={() => prefetchRoute(action.href)}
+                      onMouseEnter={() => prefetchRoute(action.href)}
+                    >
                       <Icon className="size-4" aria-hidden="true" />
                       {action.label}
                     </Link>
@@ -134,6 +140,10 @@ export function DashboardPage() {
                     className="flex items-center gap-3 rounded-md border p-3 transition-colors hover:bg-accent"
                     href={`/employees/${employee.id}`}
                     key={employee.id}
+                    onFocus={() => prefetchEmployeeRoute(employee, `/employees/${employee.id}`)}
+                    onMouseEnter={() =>
+                      prefetchEmployeeRoute(employee, `/employees/${employee.id}`)
+                    }
                   >
                     <EmployeeAvatar employee={employee} size="sm" />
                     <span className="min-w-0 flex-1">

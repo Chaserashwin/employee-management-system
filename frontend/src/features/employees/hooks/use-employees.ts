@@ -17,6 +17,7 @@ export const employeeQueryKeys = {
   detail: (id: string) => [...employeeQueryKeys.all, "detail", id] as const,
   lists: () => [...employeeQueryKeys.all, "list"] as const,
   list: (params: EmployeeListParams) => [...employeeQueryKeys.all, "list", params] as const,
+  me: () => [...employeeQueryKeys.all, "me"] as const,
   managerCandidates: (id: string) =>
     [...employeeQueryKeys.all, "manager-candidates", id] as const,
   reportees: (id: string) => [...employeeQueryKeys.all, "reportees", id] as const,
@@ -25,7 +26,7 @@ export const employeeQueryKeys = {
 export function useMyEmployeeProfile() {
   return useQuery({
     queryFn: () => employeeService.getMyProfile(),
-    queryKey: [...employeeQueryKeys.all, "me"] as const,
+    queryKey: employeeQueryKeys.me(),
     staleTime: 5 * 60_000,
   });
 }

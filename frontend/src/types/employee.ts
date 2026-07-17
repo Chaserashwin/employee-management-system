@@ -75,6 +75,7 @@ export type EmployeeFormPayload = {
   name: string;
   phone: string;
   profileImage?: File;
+  removeProfileImage?: boolean;
   role: UserRole;
   salary: number;
   status: UserStatus;

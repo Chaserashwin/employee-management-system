@@ -78,7 +78,7 @@ export type EmployeePayload = {
   manager?: string | null;
   name: string;
   phone: string;
-  profileImage?: string;
+  profileImage?: string | null;
   role: EmployeeRole;
   salary: number;
   status: EmployeeStatus;

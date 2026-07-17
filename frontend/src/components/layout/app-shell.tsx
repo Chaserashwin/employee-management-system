@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/constants/app";
 import { GlobalSearch } from "@/features/search/components/global-search";
 import { useAuth } from "@/hooks/use-auth";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import type { NavigationItem } from "@/types/navigation";
 
 const navigationItems: NavigationItem[] = [
@@ -61,6 +62,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { logout, role, user } = useAuth();
   const pathname = usePathname();
+  const { prefetchRoute } = useRoutePrefetch();
   const canUseGlobalSearch = role === "SUPER_ADMIN" || role === "HR";
   const visibleNavigationItems = navigationItems.filter((item) =>
     role ? item.roles.includes(role) : false,
@@ -96,6 +98,8 @@ export function AppShell({ children }: AppShellProps) {
                 }`}
                 href={item.href}
                 key={item.title}
+                onFocus={() => prefetchRoute(item.href)}
+                onMouseEnter={() => prefetchRoute(item.href)}
               >
                 <Icon className="size-4" aria-hidden="true" />
                 <span>{item.title}</span>

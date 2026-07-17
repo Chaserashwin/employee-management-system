@@ -23,6 +23,18 @@ const objectIdSchema = z
   .trim()
   .refine((value) => mongoose.isValidObjectId(value), "Manager must be a valid employee id.");
 
+const booleanStringSchema = z.preprocess((value) => {
+  if (value === "true") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  return value;
+}, z.boolean());
+
 const baseEmployeeSchema = z.object({
   name: requiredText("Name"),
   email: z.string().trim().email("Enter a valid email address.").toLowerCase(),
@@ -41,10 +53,15 @@ const baseEmployeeSchema = z.object({
 
 export const createEmployeeSchema = baseEmployeeSchema;
 
-export const updateEmployeeSchema = baseEmployeeSchema.partial().refine(
-  (value) => Object.keys(value).length > 0,
-  "At least one employee field is required.",
-);
+export const updateEmployeeSchema = baseEmployeeSchema
+  .partial()
+  .extend({
+    removeProfileImage: booleanStringSchema.optional(),
+  })
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    "At least one employee field is required.",
+  );
 
 export const employeeStatusSchema = z.object({
   status: z.enum(EMPLOYEE_STATUSES, "Status must be ACTIVE or INACTIVE."),

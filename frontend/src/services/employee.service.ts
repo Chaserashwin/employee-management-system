@@ -29,6 +29,10 @@ const toEmployeeFormData = (payload: EmployeeFormPayload) => {
     formData.append("profileImage", payload.profileImage);
   }
 
+  if (payload.removeProfileImage) {
+    formData.append("removeProfileImage", "true");
+  }
+
   return formData;
 };
 

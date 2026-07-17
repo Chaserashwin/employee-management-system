@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Loader2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ const getDefaultValues = (employee?: Employee): EmployeeFormValues => ({
   role: employee?.role ?? "EMPLOYEE",
   salary: employee?.salary ?? 0,
   status: employee?.status ?? "ACTIVE",
+  removeProfileImage: false,
 });
 
 type EmployeeFormProps = {
@@ -54,20 +55,53 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
     handleSubmit,
     register,
     reset,
+    setValue,
     watch,
   } = useForm<EmployeeFormValues>({
     defaultValues: getDefaultValues(employee),
     resolver: zodResolver(employeeFormSchema),
   });
+  const profileImageInputRef = useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(() =>
     employee ? getEmployeeImageUrl(employee) : undefined,
   );
   const selectedProfileImage = watch("profileImage");
+  const removeProfileImage = watch("removeProfileImage");
+  const profileImageInput = register("profileImage");
+  const existingProfileImageUrl = employee ? getEmployeeImageUrl(employee) : undefined;
 
   useEffect(() => {
     reset(getDefaultValues(employee));
-    setPreviewUrl(employee ? getEmployeeImageUrl(employee) : undefined);
-  }, [employee, reset]);
+    setPreviewUrl(existingProfileImageUrl);
+
+    if (profileImageInputRef.current) {
+      profileImageInputRef.current.value = "";
+    }
+  }, [employee, existingProfileImageUrl, reset]);
+
+  useEffect(() => {
+    register("removeProfileImage");
+  }, [register]);
+
+  const handleRemoveProfileImage = () => {
+    const selectedFile = selectedProfileImage?.item(0);
+
+    setValue("profileImage", undefined, { shouldDirty: true });
+
+    if (profileImageInputRef.current) {
+      profileImageInputRef.current.value = "";
+    }
+
+    if (selectedFile && existingProfileImageUrl && !removeProfileImage) {
+      setPreviewUrl(existingProfileImageUrl);
+      return;
+    }
+
+    setPreviewUrl(undefined);
+    setValue("removeProfileImage", mode === "edit" && Boolean(existingProfileImageUrl), {
+      shouldDirty: true,
+    });
+  };
 
   useEffect(() => {
     const selectedFile = selectedProfileImage?.item(0);
@@ -78,9 +112,10 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
 
     const objectUrl = URL.createObjectURL(selectedFile);
     setPreviewUrl(objectUrl);
+    setValue("removeProfileImage", false, { shouldDirty: true });
 
     return () => URL.revokeObjectURL(objectUrl);
-  }, [selectedProfileImage]);
+  }, [selectedProfileImage, setValue]);
 
   return (
     <Card>
@@ -199,14 +234,35 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
           <div className="space-y-2">
             <Label htmlFor="profileImage">Profile Image</Label>
             {previewUrl ? (
-              <div
-                aria-label="Profile image preview"
-                className="size-20 rounded-md border bg-cover bg-center"
-                role="img"
-                style={{ backgroundImage: `url("${previewUrl}")` }}
-              />
+              <div className="relative size-20">
+                <div
+                  aria-label="Profile image preview"
+                  className="size-20 rounded-md border bg-cover bg-center"
+                  role="img"
+                  style={{ backgroundImage: `url("${previewUrl}")` }}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -right-2 -top-2 size-6 rounded-full shadow"
+                  onClick={handleRemoveProfileImage}
+                  aria-label="Remove profile image"
+                >
+                  <X className="size-3" aria-hidden="true" />
+                </Button>
+              </div>
             ) : null}
-            <Input id="profileImage" type="file" accept="image/*" {...register("profileImage")} />
+            <Input
+              id="profileImage"
+              type="file"
+              accept="image/*"
+              {...profileImageInput}
+              ref={(element) => {
+                profileImageInput.ref(element);
+                profileImageInputRef.current = element;
+              }}
+            />
           </div>
 
           <div className="flex justify-end gap-2 lg:col-span-2">

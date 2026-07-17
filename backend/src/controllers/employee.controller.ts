@@ -20,7 +20,7 @@ import { AppError } from "../utils/app-error";
 import { asyncHandler } from "../utils/async-handler";
 import { createSuccessResponse } from "../utils/response";
 import { toUploadedEmployeeImageUrl } from "../middlewares/upload.middleware";
-import type { EmployeeListQuery } from "../types/employee";
+import type { EmployeeListQuery, EmployeePayload, EmployeeUpdatePayload } from "../types/employee";
 
 const getRequester = (requestUser: Express.Request["user"]) => {
   if (!requestUser) {
@@ -30,20 +30,28 @@ const getRequester = (requestUser: Express.Request["user"]) => {
   return requestUser;
 };
 
-const mergeEmployeePayloadWithUpload = <TPayload extends Record<string, unknown>>(
-  payload: TPayload,
+const mergeEmployeePayloadWithUpload = <TPayload extends EmployeePayload | EmployeeUpdatePayload>(
+  payload: TPayload & { removeProfileImage?: boolean },
   file: Express.Multer.File | undefined,
-) => {
+): TPayload => {
+  const { removeProfileImage, ...employeePayload } = payload;
   const profileImage = toUploadedEmployeeImageUrl(file);
 
-  if (!profileImage) {
-    return payload;
+  if (profileImage) {
+    return {
+      ...employeePayload,
+      profileImage,
+    } as TPayload;
   }
 
-  return {
-    ...payload,
-    profileImage,
-  };
+  if (removeProfileImage === true) {
+    return {
+      ...employeePayload,
+      profileImage: null,
+    } as TPayload;
+  }
+
+  return employeePayload as TPayload;
 };
 
 export const getEmployees = asyncHandler(async (request, response) => {
@@ -68,21 +76,33 @@ export const getMyEmployeeProfile = asyncHandler(async (request, response) => {
 });
 
 export const createEmployee = asyncHandler(async (request, response) => {
-  const payload = normalizeEmployeePayload(mergeEmployeePayloadWithUpload(request.body, request.file));
+  const payload = normalizeEmployeePayload(
+    mergeEmployeePayloadWithUpload(request.body as EmployeePayload, request.file),
+  );
   const employee = await addEmployee(payload, getRequester(request.user));
 
   response.status(HTTP_STATUS.CREATED).json(createSuccessResponse(employee, "Employee created."));
 });
 
 export const updateEmployee = asyncHandler(async (request, response) => {
-  const payload = normalizeEmployeePayload(mergeEmployeePayloadWithUpload(request.body, request.file));
+  const payload = normalizeEmployeePayload(
+    mergeEmployeePayloadWithUpload(
+      request.body as EmployeeUpdatePayload & { removeProfileImage?: boolean },
+      request.file,
+    ),
+  );
   const employee = await editEmployee(request.params.id, payload, getRequester(request.user));
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employee, "Employee updated."));
 });
 
 export const updateMyEmployeeProfile = asyncHandler(async (request, response) => {
-  const payload = normalizeEmployeePayload(mergeEmployeePayloadWithUpload(request.body, request.file));
+  const payload = normalizeEmployeePayload(
+    mergeEmployeePayloadWithUpload(
+      request.body as EmployeeUpdatePayload & { removeProfileImage?: boolean },
+      request.file,
+    ),
+  );
   const employee = await editOwnEmployeeProfile(getRequester(request.user), payload);
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employee, "Employee profile updated."));
