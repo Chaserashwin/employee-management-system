@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { APP_NAME } from "@/constants/app";
 import { useAuth } from "@/hooks/use-auth";
 import { getApiErrorMessage } from "@/utils/api-error";
+import { getPostLoginPath } from "@/utils/auth-navigation";
 
 const loginFormSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
@@ -26,7 +27,7 @@ type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, login } = useAuth();
+  const { isAuthenticated, isLoading, login, role } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -44,10 +45,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace("/");
+    if (!isLoading && isAuthenticated && role) {
+      router.replace(getPostLoginPath(role));
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, role, router]);
 
   const onSubmit = async (values: LoginFormValues) => {
     setFormError(null);

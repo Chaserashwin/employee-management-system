@@ -27,7 +27,7 @@ export function useRoutePrefetch() {
     (href: string) => {
       router.prefetch(href);
 
-      if (href === "/") {
+      if (href === "/" || href === "/dashboard") {
         void queryClient.prefetchQuery({
           queryFn: () => dashboardService.getDashboard(),
           queryKey: dashboardQueryKeys.summary,

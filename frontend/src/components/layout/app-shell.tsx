@@ -25,7 +25,7 @@ import type { NavigationItem } from "@/types/navigation";
 const navigationItems: NavigationItem[] = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: CircleDot,
     roles: ["SUPER_ADMIN", "HR"],
   },
@@ -87,7 +87,9 @@ export function AppShell({ children }: AppShellProps) {
             const isActive =
               item.href === "/"
                 ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`) ||
+                  (item.href === "/dashboard" && pathname === "/");
 
             return (
               <Link

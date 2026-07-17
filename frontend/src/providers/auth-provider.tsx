@@ -14,6 +14,7 @@ import { setUnauthorizedHandler } from "@/services/api/client";
 import { authService } from "@/services/auth.service";
 import { authTokenStorage } from "@/services/auth-token";
 import type { AuthUser, LoginCredentials, UserRole } from "@/types/auth";
+import { getPostLoginPath } from "@/utils/auth-navigation";
 
 type AuthContextValue = {
   isAuthenticated: boolean;
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       authTokenStorage.setToken(loginResult.token);
       setUser(loginResult.user);
-      router.replace(loginResult.user.role === "EMPLOYEE" ? "/profile" : "/");
+      router.replace(getPostLoginPath(loginResult.user.role));
     },
     [router],
   );

@@ -17,7 +17,7 @@ const toPayload = (values: EmployeeFormValues): EmployeeFormPayload => ({
   removeProfileImage: values.removeProfileImage ?? false,
 });
 
-export default function EditEmployeePage() {
+function EditEmployeeContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const employeeQuery = useEmployee(params.id);
@@ -34,24 +34,30 @@ export default function EditEmployeePage() {
   };
 
   return (
-    <RoleGate allowedRoles={["SUPER_ADMIN", "HR"]}>
-      <div className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-normal">Edit Employee</h1>
-          <p className="text-sm text-muted-foreground">Update employee profile details.</p>
-        </div>
-        {employeeQuery.isError ? (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-            {getApiErrorMessage(employeeQuery.error)}
-          </div>
-        ) : null}
-        <EmployeeForm
-          mode="edit"
-          employee={employeeQuery.data}
-          isSubmitting={updateEmployeeMutation.isPending || employeeQuery.isLoading}
-          onSubmit={handleSubmit}
-        />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-normal">Edit Employee</h1>
+        <p className="text-sm text-muted-foreground">Update employee profile details.</p>
       </div>
+      {employeeQuery.isError ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          {getApiErrorMessage(employeeQuery.error)}
+        </div>
+      ) : null}
+      <EmployeeForm
+        mode="edit"
+        employee={employeeQuery.data}
+        isSubmitting={updateEmployeeMutation.isPending || employeeQuery.isLoading}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  );
+}
+
+export default function EditEmployeePage() {
+  return (
+    <RoleGate allowedRoles={["SUPER_ADMIN", "HR"]}>
+      <EditEmployeeContent />
     </RoleGate>
   );
 }

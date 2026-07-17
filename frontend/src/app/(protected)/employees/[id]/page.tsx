@@ -2,11 +2,12 @@
 
 import { useParams } from "next/navigation";
 
+import { RoleGate } from "@/components/layout/role-gate";
 import { EmployeeDetail } from "@/features/employees/components/employee-detail";
 import { useEmployee } from "@/features/employees/hooks/use-employees";
 import { getApiErrorMessage } from "@/utils/api-error";
 
-export default function EmployeeDetailsPage() {
+function EmployeeDetailsContent() {
   const params = useParams<{ id: string }>();
   const employeeQuery = useEmployee(params.id);
 
@@ -19,5 +20,13 @@ export default function EmployeeDetailsPage() {
       ) : null}
       <EmployeeDetail employee={employeeQuery.data} isLoading={employeeQuery.isLoading} />
     </div>
+  );
+}
+
+export default function EmployeeDetailsPage() {
+  return (
+    <RoleGate allowedRoles={["SUPER_ADMIN", "HR"]}>
+      <EmployeeDetailsContent />
+    </RoleGate>
   );
 }
