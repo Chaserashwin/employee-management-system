@@ -28,11 +28,13 @@ import { showToast } from "@/lib/toast";
 import { getApiErrorMessage } from "@/utils/api-error";
 import { useAuth } from "@/hooks/use-auth";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import type { UserRole, UserStatus } from "@/types/auth";
 import type { Employee, EmployeeListParams } from "@/types/employee";
 
 export function EmployeeListPage() {
   const { role } = useAuth();
+  const { startRouteNavigation } = useRoutePrefetch();
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
   const [employeeRole, setEmployeeRole] = useState<UserRole | "">("");
@@ -115,7 +117,7 @@ export function EmployeeListPage() {
         </div>
         {canCreate ? (
           <Button asChild>
-            <Link href="/employees/new">
+            <Link href="/employees/new" onClick={() => startRouteNavigation("/employees/new")}>
               <Plus className="size-4" aria-hidden="true" />
               New Employee
             </Link>

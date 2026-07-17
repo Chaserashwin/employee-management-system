@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
   createContext,
@@ -13,6 +14,11 @@ import {
 import { setUnauthorizedHandler } from "@/services/api/client";
 import { authService } from "@/services/auth.service";
 import { authTokenStorage } from "@/services/auth-token";
+import { dashboardQueryKeys } from "@/features/dashboard/hooks/use-dashboard";
+import { employeeQueryKeys } from "@/features/employees/hooks/use-employees";
+import { dashboardService } from "@/services/dashboard.service";
+import { employeeService } from "@/services/employee.service";
+import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 import type { AuthUser, LoginCredentials, UserRole } from "@/types/auth";
 import { getPostLoginPath } from "@/utils/auth-navigation";
 
@@ -34,6 +40,8 @@ type AuthProviderProps = {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { finishNavigation, startNavigation } = useNavigationProgress();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -67,32 +75,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     return setUnauthorizedHandler(() => {
+      startNavigation();
       clearSession();
+      queryClient.clear();
       router.replace("/login");
     });
-  }, [clearSession, router]);
+  }, [clearSession, queryClient, router, startNavigation]);
 
   const login = useCallback(
     async (credentials: LoginCredentials) => {
-      const loginResult = await authService.login(credentials);
+      startNavigation();
 
-      authTokenStorage.setToken(loginResult.token);
-      setUser(loginResult.user);
-      router.replace(getPostLoginPath(loginResult.user.role));
+      try {
+        const loginResult = await authService.login(credentials);
+
+        authTokenStorage.setToken(loginResult.token);
+        setUser(loginResult.user);
+
+        if (loginResult.user.role === "EMPLOYEE") {
+          void queryClient.prefetchQuery({
+            queryFn: () => employeeService.getMyProfile(),
+            queryKey: employeeQueryKeys.me(),
+            staleTime: 5 * 60_000,
+          });
+        } else {
+          void queryClient.prefetchQuery({
+            queryFn: () => dashboardService.getDashboard(),
+            queryKey: dashboardQueryKeys.summary,
+            staleTime: 5 * 60_000,
+          });
+        }
+
+        router.replace(getPostLoginPath(loginResult.user.role));
+      } catch (error) {
+        finishNavigation();
+        throw error;
+      }
     },
-    [router],
+    [finishNavigation, queryClient, router, startNavigation],
   );
 
   const logout = useCallback(async () => {
-    try {
-      if (authTokenStorage.getToken()) {
-        await authService.logout();
-      }
-    } finally {
-      clearSession();
-      router.replace("/login");
+    const token = authTokenStorage.getToken() ?? undefined;
+
+    startNavigation();
+    clearSession();
+    queryClient.clear();
+    router.replace("/login");
+
+    if (token) {
+      void authService.logout(token).catch(() => undefined);
     }
-  }, [clearSession, router]);
+  }, [clearSession, queryClient, router, startNavigation]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -62,7 +62,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { logout, role, user } = useAuth();
   const pathname = usePathname();
-  const { prefetchRoute } = useRoutePrefetch();
+  const { prefetchRoute, startRouteNavigation } = useRoutePrefetch();
   const canUseGlobalSearch = role === "SUPER_ADMIN" || role === "HR";
   const visibleNavigationItems = navigationItems.filter((item) =>
     role ? item.roles.includes(role) : false,
@@ -100,6 +100,7 @@ export function AppShell({ children }: AppShellProps) {
                 }`}
                 href={item.href}
                 key={item.title}
+                onClick={() => startRouteNavigation(item.href)}
                 onFocus={() => prefetchRoute(item.href)}
                 onMouseEnter={() => prefetchRoute(item.href)}
               >

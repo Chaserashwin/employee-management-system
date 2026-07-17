@@ -29,7 +29,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" aria-label="Redirecting" />
+      </div>
+    );
   }
 
   return children;

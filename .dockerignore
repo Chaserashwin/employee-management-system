@@ -1,9 +1,0 @@
-node_modules
-frontend/.next
-backend/dist
-backend/uploads
-.logs
-.git
-.env
-.env.*
-!.env.example

@@ -13,7 +13,7 @@ Production-grade Employee Management System built as a TypeScript monorepo with 
 - Global employee search
 - Profile and settings pages
 - Light, dark, and system theme support
-- Docker, Vercel, Render, and MongoDB Atlas ready configuration
+- Vercel, Render, and MongoDB Atlas ready configuration
 
 ## Architecture
 
@@ -22,7 +22,6 @@ employee-management-system/
   frontend/              Next.js 15 App Router UI
   backend/               Express TypeScript API
   docs/API.md            API documentation
-  docker-compose.yml     Local container orchestration
 ```
 
 The backend follows route, controller, service, repository, model, validator, and middleware boundaries. The frontend uses App Router route groups, feature modules, shared UI primitives, Axios, React Query, Zod, React Hook Form, and shared providers.
@@ -40,7 +39,7 @@ Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn-style component
 
 Backend: Node.js, Express, TypeScript, MongoDB, Mongoose, JWT, bcrypt, Multer, Helmet, CORS, Morgan, Compression.
 
-Tooling: npm workspaces, ESLint, Prettier, Docker.
+Tooling: npm workspaces, ESLint, Prettier.
 
 ## Environment Variables
 
@@ -54,7 +53,7 @@ Backend `backend/.env`:
 
 ```env
 PORT=5001
-MONGODB_URI=mongodb://localhost:27017/ems
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/employee_management
 JWT_SECRET=replace-with-a-secure-secret
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:4000
@@ -62,13 +61,15 @@ CORS_ORIGIN=http://localhost:4000
 
 ## Installation
 
+Install dependencies from the monorepo root:
+
 ```bash
 npm install
 ```
 
 ## Database Setup
 
-Use local MongoDB, Docker MongoDB, or MongoDB Atlas. Set `MONGODB_URI` in `backend/.env`.
+Use MongoDB Atlas. Set `MONGODB_URI` in `backend/.env`.
 
 Seed default users and demo employee profiles:
 
@@ -86,9 +87,19 @@ Default credentials:
 
 ## Run Locally
 
-Start frontend and backend together:
+Start the backend:
 
 ```bash
+cd backend
+npm install
+npm run dev
+```
+
+Start the frontend in a separate terminal:
+
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
@@ -109,20 +120,6 @@ Root:
 Backend:
 
 - `npm run seed --workspace backend`
-
-## Docker
-
-Create a `.env` file at the monorepo root with:
-
-```env
-JWT_SECRET=replace-with-a-secure-secret
-```
-
-Start containers:
-
-```bash
-docker compose up --build
-```
 
 ## Deployment
 

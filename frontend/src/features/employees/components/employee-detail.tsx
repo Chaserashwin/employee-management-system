@@ -22,6 +22,7 @@ import {
   formatEmployeeSalary,
 } from "@/features/employees/utils/employee-format";
 import { useAuth } from "@/hooks/use-auth";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import { showToast } from "@/lib/toast";
 import type { UserRole } from "@/types/auth";
 import type { Employee } from "@/types/employee";
@@ -37,6 +38,7 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
   const [isManagerDialogOpen, setIsManagerDialogOpen] = useState(false);
   const updateManagerMutation = useUpdateEmployeeManager();
   const updateRoleMutation = useUpdateEmployeeRole();
+  const { startRouteNavigation } = useRoutePrefetch();
   const chainQuery = useEmployeeChain(employee?.id ?? "", Boolean(employee));
   const reporteesQuery = useEmployeeReportees(
     employee?.id ?? "",
@@ -129,7 +131,10 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
           ) : null}
           {canEdit ? (
             <Button asChild>
-              <Link href={`/employees/${employee.id}/edit`}>
+              <Link
+                href={`/employees/${employee.id}/edit`}
+                onClick={() => startRouteNavigation(`/employees/${employee.id}/edit`)}
+              >
                 <Pencil className="size-4" aria-hidden="true" />
                 Edit
               </Link>

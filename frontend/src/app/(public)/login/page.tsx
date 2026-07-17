@@ -139,7 +139,7 @@ export default function LoginPage() {
 
             <Button className="w-full" type="submit" disabled={isSubmitting || isLoading}>
               {isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-              Sign in
+              {isSubmitting ? "Signing in" : "Sign in"}
             </Button>
           </form>
         </CardContent>

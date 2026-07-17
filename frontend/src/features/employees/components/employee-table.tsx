@@ -33,7 +33,7 @@ export function EmployeeTable({
   const canEdit = currentUserRole === "SUPER_ADMIN" || currentUserRole === "HR";
   const canDelete = currentUserRole === "SUPER_ADMIN";
   const canChangeStatus = currentUserRole === "SUPER_ADMIN" || currentUserRole === "HR";
-  const { prefetchEmployeeRoute } = useRoutePrefetch();
+  const { prefetchEmployeeRoute, startRouteNavigation } = useRoutePrefetch();
 
   if (isLoading) {
     return (
@@ -113,6 +113,7 @@ export function EmployeeTable({
                     <Button variant="ghost" size="icon" asChild aria-label="View employee">
                       <Link
                         href={`/employees/${employee.id}`}
+                        onClick={() => startRouteNavigation(`/employees/${employee.id}`)}
                         onFocus={() => prefetchEmployeeRoute(employee, `/employees/${employee.id}`)}
                         onMouseEnter={() =>
                           prefetchEmployeeRoute(employee, `/employees/${employee.id}`)
@@ -125,6 +126,7 @@ export function EmployeeTable({
                       <Button variant="ghost" size="icon" asChild aria-label="Edit employee">
                         <Link
                           href={`/employees/${employee.id}/edit`}
+                          onClick={() => startRouteNavigation(`/employees/${employee.id}/edit`)}
                           onFocus={() =>
                             prefetchEmployeeRoute(employee, `/employees/${employee.id}/edit`)
                           }

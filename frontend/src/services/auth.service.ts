@@ -8,8 +8,18 @@ export const authService = {
 
     return response.data.data;
   },
-  async logout() {
-    await apiClient.post<ApiResponse<null>>("/api/auth/logout");
+  async logout(token?: string) {
+    await apiClient.post<ApiResponse<null>>(
+      "/api/auth/logout",
+      null,
+      token
+        ? {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
+    );
   },
   async getCurrentUser() {
     const response = await apiClient.get<ApiResponse<AuthUser>>("/api/auth/me");

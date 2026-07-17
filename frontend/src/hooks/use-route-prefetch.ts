@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 import { dashboardQueryKeys } from "@/features/dashboard/hooks/use-dashboard";
@@ -10,6 +10,7 @@ import { organizationQueryKeys } from "@/features/organization/hooks/use-organiz
 import { dashboardService } from "@/services/dashboard.service";
 import { employeeService } from "@/services/employee.service";
 import { organizationService } from "@/services/organization.service";
+import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 import type { Employee, EmployeeListParams } from "@/types/employee";
 
 const DEFAULT_EMPLOYEE_LIST_PARAMS = {
@@ -21,7 +22,21 @@ const DEFAULT_EMPLOYEE_LIST_PARAMS = {
 
 export function useRoutePrefetch() {
   const queryClient = useQueryClient();
+  const pathname = usePathname();
   const router = useRouter();
+  const { startNavigation } = useNavigationProgress();
+
+  const startRouteNavigation = useCallback(
+    (href: string) => {
+      const isCurrentRoute =
+        pathname === href || (href === "/dashboard" && pathname === "/");
+
+      if (!isCurrentRoute) {
+        startNavigation();
+      }
+    },
+    [pathname, startNavigation],
+  );
 
   const prefetchRoute = useCallback(
     (href: string) => {
@@ -76,5 +91,7 @@ export function useRoutePrefetch() {
   return {
     prefetchEmployeeRoute,
     prefetchRoute,
+    startNavigation,
+    startRouteNavigation,
   };
 }

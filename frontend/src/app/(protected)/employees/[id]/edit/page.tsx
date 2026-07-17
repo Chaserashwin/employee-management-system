@@ -7,6 +7,7 @@ import { EmployeeForm } from "@/features/employees/components/employee-form";
 import { useEmployee, useUpdateEmployee } from "@/features/employees/hooks/use-employees";
 import type { EmployeeFormValues } from "@/features/employees/validation/employee-form.schema";
 import { showToast } from "@/lib/toast";
+import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 import type { EmployeeFormPayload } from "@/types/employee";
 import { getApiErrorMessage } from "@/utils/api-error";
 
@@ -22,12 +23,14 @@ function EditEmployeeContent() {
   const router = useRouter();
   const employeeQuery = useEmployee(params.id);
   const updateEmployeeMutation = useUpdateEmployee(params.id);
+  const { startNavigation } = useNavigationProgress();
 
   const handleSubmit = async (values: EmployeeFormValues) => {
     try {
-      const employee = await updateEmployeeMutation.mutateAsync(toPayload(values));
+      await updateEmployeeMutation.mutateAsync(toPayload(values));
       showToast.success("Employee updated.");
-      router.push(`/employees/${employee.id}`);
+      startNavigation();
+      router.push(`/employees/${params.id}`);
     } catch (error) {
       showToast.error(getApiErrorMessage(error));
     }

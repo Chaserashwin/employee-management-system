@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import { employeeService } from "@/services/employee.service";
 import type {
+  Employee,
   EmployeeFormPayload,
   EmployeeManagerPayload,
   EmployeeListParams,
@@ -96,6 +97,34 @@ export function useUpdateEmployee(id: string) {
 
   return useMutation({
     mutationFn: (payload: EmployeeFormPayload) => employeeService.updateEmployee(id, payload),
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: employeeQueryKeys.detail(id) });
+
+      const previousEmployee = queryClient.getQueryData<Employee>(employeeQueryKeys.detail(id));
+
+      if (previousEmployee) {
+        queryClient.setQueryData<Employee>(employeeQueryKeys.detail(id), {
+          ...previousEmployee,
+          department: payload.department,
+          designation: payload.designation,
+          email: payload.email,
+          joiningDate: payload.joiningDate,
+          name: payload.name,
+          phone: payload.phone,
+          profileImage: payload.removeProfileImage ? undefined : previousEmployee.profileImage,
+          role: payload.role,
+          salary: payload.salary,
+          status: payload.status,
+        });
+      }
+
+      return { previousEmployee };
+    },
+    onError: (_error, _payload, context) => {
+      if (context?.previousEmployee) {
+        queryClient.setQueryData(employeeQueryKeys.detail(id), context.previousEmployee);
+      }
+    },
     onSuccess: (employee) => {
       queryClient.setQueryData(employeeQueryKeys.detail(id), employee);
       void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });

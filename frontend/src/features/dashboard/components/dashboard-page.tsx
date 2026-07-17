@@ -33,7 +33,7 @@ const quickActions = [
 export function DashboardPage() {
   const dashboardQuery = useDashboardSummary();
   const dashboard = dashboardQuery.data;
-  const { prefetchEmployeeRoute, prefetchRoute } = useRoutePrefetch();
+  const { prefetchEmployeeRoute, prefetchRoute, startRouteNavigation } = useRoutePrefetch();
 
   return (
     <div className="space-y-6">
@@ -111,6 +111,7 @@ export function DashboardPage() {
                   <Button variant="outline" className="justify-start" asChild key={action.href}>
                     <Link
                       href={action.href}
+                      onClick={() => startRouteNavigation(action.href)}
                       onFocus={() => prefetchRoute(action.href)}
                       onMouseEnter={() => prefetchRoute(action.href)}
                     >
@@ -140,6 +141,7 @@ export function DashboardPage() {
                     className="flex items-center gap-3 rounded-md border p-3 transition-colors hover:bg-accent"
                     href={`/employees/${employee.id}`}
                     key={employee.id}
+                    onClick={() => startRouteNavigation(`/employees/${employee.id}`)}
                     onFocus={() => prefetchEmployeeRoute(employee, `/employees/${employee.id}`)}
                     onMouseEnter={() =>
                       prefetchEmployeeRoute(employee, `/employees/${employee.id}`)
