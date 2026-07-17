@@ -13,7 +13,7 @@ import { EmployeeAvatar } from "@/features/employees/components/employee-avatar"
 import { ManagerAssignmentDialog } from "@/features/employees/components/manager-assignment-dialog";
 import {
   useEmployeeChain,
-  useEmployeeReportees,
+  useEmployeeDirectReports,
   useUpdateEmployeeManager,
   useUpdateEmployeeRole,
 } from "@/features/employees/hooks/use-employees";
@@ -40,13 +40,14 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
   const updateRoleMutation = useUpdateEmployeeRole();
   const { startRouteNavigation } = useRoutePrefetch();
   const chainQuery = useEmployeeChain(employee?.id ?? "", Boolean(employee));
-  const reporteesQuery = useEmployeeReportees(
+  const directReportsQuery = useEmployeeDirectReports(
     employee?.id ?? "",
     Boolean(employee && (role === "SUPER_ADMIN" || role === "HR")),
   );
   const canEdit =
     role === "SUPER_ADMIN" || (role === "HR" && employee?.role !== "SUPER_ADMIN");
-  const canAssignManager = role === "SUPER_ADMIN";
+  const canAssignManager =
+    role === "SUPER_ADMIN" || (role === "HR" && employee?.role !== "SUPER_ADMIN");
   const canManageRole = role === "SUPER_ADMIN";
 
   if (isLoading) {
@@ -207,29 +208,46 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Reportees</CardTitle>
+            <CardTitle className="text-lg tracking-normal">Direct Reports</CardTitle>
           </CardHeader>
           <CardContent>
-            {reporteesQuery.isLoading ? (
+            {directReportsQuery.isLoading ? (
               <Skeleton className="h-20 w-full" />
-            ) : reporteesQuery.data ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+            ) : directReportsQuery.data ? (
+              <div className="space-y-3">
                 <div className="rounded-md border p-4">
-                  <p className="text-xs font-medium uppercase text-muted-foreground">Direct</p>
-                  <p className="mt-2 text-2xl font-semibold">
-                    {reporteesQuery.data.directReportees.length}
-                  </p>
+                  <p className="text-xs font-medium uppercase text-muted-foreground">Count</p>
+                  <p className="mt-2 text-2xl font-semibold">{directReportsQuery.data.count}</p>
                 </div>
-                <div className="rounded-md border p-4">
-                  <p className="text-xs font-medium uppercase text-muted-foreground">Nested</p>
-                  <p className="mt-2 text-2xl font-semibold">
-                    {reporteesQuery.data.nestedReportees.length}
-                  </p>
-                </div>
+                {directReportsQuery.data.items.length > 0 ? (
+                  <div className="grid gap-3">
+                    {directReportsQuery.data.items.map((report) => (
+                      <Link
+                        className="flex items-center gap-3 rounded-md border p-3 transition-colors hover:bg-accent"
+                        href={`/employees/${report.id}`}
+                        key={report.id}
+                        onClick={() => startRouteNavigation(`/employees/${report.id}`)}
+                      >
+                        <EmployeeAvatar employee={report} size="sm" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">{report.name}</span>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {report.employeeId} - {report.designation}
+                          </span>
+                        </span>
+                        <Badge variant={report.status === "ACTIVE" ? "success" : "warning"}>
+                          {report.status}
+                        </Badge>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No direct reports.</p>
+                )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Reportees are visible to HR and SUPER_ADMIN roles.
+                Direct reports are visible to HR and SUPER_ADMIN roles.
               </p>
             )}
           </CardContent>

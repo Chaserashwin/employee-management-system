@@ -1,8 +1,11 @@
 "use client";
 
+import type { ButtonProps } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 
 type ConfirmDialogProps = {
+  confirmLabel?: string;
+  confirmVariant?: ButtonProps["variant"];
   description: string;
   isOpen: boolean;
   isPending?: boolean;
@@ -12,6 +15,8 @@ type ConfirmDialogProps = {
 };
 
 export function ConfirmDialog({
+  confirmLabel = "Delete",
+  confirmVariant = "destructive",
   description,
   isOpen,
   isPending = false,
@@ -41,8 +46,8 @@ export function ConfirmDialog({
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button type="button" variant="destructive" onClick={onConfirm} disabled={isPending}>
-            Delete
+          <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={isPending}>
+            {confirmLabel}
           </Button>
         </div>
       </div>

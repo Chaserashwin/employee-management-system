@@ -9,6 +9,7 @@ import type {
   EmployeeRecord,
   EmployeeSummary,
   EmployeeUpdatePayload,
+  DirectReportsResult,
   OrganizationTreeNode,
   ReporteesResult,
 } from "../types/employee";
@@ -16,12 +17,16 @@ import { AppError } from "../utils/app-error";
 import {
   createEmployee,
   findAllEmployees,
+  findDeletedEmployees,
   findEmployeeByEmail,
   findEmployeeByEmailIncludingDeleted,
   findEmployeeById,
   findEmployeesByIds,
   findEmployees,
   findManagerCandidates,
+  hardDeleteEmployeeById,
+  hardDeleteEmployeesByIds,
+  restoreEmployeesByIds,
   restoreEmployeeById,
   softDeleteEmployeeById,
   updateEmployeeById,
@@ -83,9 +88,11 @@ const getManagerMapForEmployees = async (employees: EmployeeDocument[]) => {
 
 const createChildrenMap = (employees: EmployeeDocument[]) => {
   const childrenMap = new Map<string, EmployeeDocument[]>();
+  const employeeIds = new Set(employees.map(getDocumentId));
 
   for (const employee of employees) {
-    const managerId = getManagerId(employee) ?? "ROOT";
+    const currentManagerId = getManagerId(employee);
+    const managerId = currentManagerId && employeeIds.has(currentManagerId) ? currentManagerId : "ROOT";
     const children = childrenMap.get(managerId) ?? [];
 
     children.push(employee);
@@ -101,12 +108,15 @@ const toEmployeeRecord = (
 ): EmployeeRecord => {
   return {
     createdAt: employee.createdAt,
-    deleted: employee.deleted,
+    deleted: employee.deleted || employee.isDeleted,
+    deletedAt: employee.deletedAt ?? null,
+    deletedBy: employee.deletedBy ? toId(employee.deletedBy) : null,
     department: employee.department,
     designation: employee.designation,
     email: employee.email,
     employeeId: employee.employeeId,
     id: getDocumentId(employee),
+    isDeleted: employee.deleted || employee.isDeleted,
     joiningDate: employee.joiningDate,
     manager: employee.manager && employeeMap.get(toId(employee.manager))
       ? toEmployeeSummary(employeeMap.get(toId(employee.manager)) as EmployeeDocument)
@@ -222,6 +232,38 @@ const createDuplicateEmployeeError = () => {
   return new AppError("Employee email or employee ID already exists.", HTTP_STATUS.CONFLICT);
 };
 
+const createEmployeeListResult = (
+  employees: EmployeeDocument[],
+  totalRecords: number,
+  query: EmployeeListQuery,
+  employeeMap: Map<string, EmployeeDocument>,
+): EmployeeListResult => {
+  const totalPages = Math.max(Math.ceil(totalRecords / query.limit), 1);
+  const page = Math.min(query.page, totalPages);
+  const items = employees.map((employee) => toEmployeeRecord(employee, employeeMap));
+  const hasPrevious = page > 1;
+  const hasNext = page < totalPages;
+
+  return {
+    data: items,
+    hasNext,
+    hasPrevious,
+    items,
+    limit: query.limit,
+    page,
+    pagination: {
+      currentPage: page,
+      hasNext,
+      hasPrevious,
+      limit: query.limit,
+      totalPages,
+      totalRecords,
+    },
+    totalItems: totalRecords,
+    totalPages,
+  };
+};
+
 export const listEmployees = async (
   query: EmployeeListQuery,
   requester: AuthenticatedUser,
@@ -232,17 +274,22 @@ export const listEmployees = async (
 
   const { employees, totalRecords } = await findEmployees(query);
   const employeeMap = await getManagerMapForEmployees(employees);
-  const totalPages = Math.max(Math.ceil(totalRecords / query.limit), 1);
 
-  return {
-    data: employees.map((employee) => toEmployeeRecord(employee, employeeMap)),
-    pagination: {
-      currentPage: query.page,
-      limit: query.limit,
-      totalPages,
-      totalRecords,
-    },
-  };
+  return createEmployeeListResult(employees, totalRecords, query, employeeMap);
+};
+
+export const listDeletedEmployees = async (
+  query: EmployeeListQuery,
+  requester: AuthenticatedUser,
+): Promise<EmployeeListResult> => {
+  if (requester.role !== "SUPER_ADMIN") {
+    throw new AppError("You are not authorized to access deleted employees.", HTTP_STATUS.FORBIDDEN);
+  }
+
+  const { employees, totalRecords } = await findDeletedEmployees(query);
+  const employeeMap = await getManagerMapForEmployees(employees);
+
+  return createEmployeeListResult(employees, totalRecords, query, employeeMap);
 };
 
 export const getEmployee = async (id: string, requester: AuthenticatedUser) => {
@@ -328,8 +375,8 @@ export const editOwnEmployeeProfile = async (
   return toEmployeeRecord(updatedEmployee, await getManagerMapForEmployees([updatedEmployee]));
 };
 
-export const removeEmployee = async (id: string) => {
-  const employee = await softDeleteEmployeeById(id);
+export const removeEmployee = async (id: string, requester: AuthenticatedUser) => {
+  const employee = await softDeleteEmployeeById(id, requester.id);
 
   if (!employee) {
     throw new AppError("Employee not found.", HTTP_STATUS.NOT_FOUND);
@@ -346,6 +393,24 @@ export const restoreEmployee = async (id: string) => {
   }
 
   return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
+};
+
+export const permanentlyDeleteEmployee = async (id: string) => {
+  const employee = await hardDeleteEmployeeById(id);
+
+  if (!employee) {
+    throw new AppError("Deleted employee not found.", HTTP_STATUS.NOT_FOUND);
+  }
+
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
+};
+
+export const restoreEmployees = async (ids: string[]) => {
+  return restoreEmployeesByIds(ids);
+};
+
+export const permanentlyDeleteEmployees = async (ids: string[]) => {
+  return hardDeleteEmployeesByIds(ids);
 };
 
 export const changeEmployeeStatus = async (
@@ -393,8 +458,10 @@ export const changeEmployeeRole = async (
 export const assignEmployeeManager = async (
   id: string,
   managerId: string | null | undefined,
+  requester: AuthenticatedUser,
 ) => {
   const employee = await getEmployeeOrThrow(id);
+  assertHrCanModifyEmployee(employee, requester);
 
   if (!managerId) {
     if (!employee.manager) {
@@ -482,6 +549,18 @@ export const getEmployeeReportees = async (
   return {
     directReportees,
     nestedReportees: flattenTree(directReportees),
+  };
+};
+
+export const getEmployeeDirectReports = async (
+  id: string,
+  requester: AuthenticatedUser,
+): Promise<DirectReportsResult> => {
+  const reportees = await getEmployeeReportees(id, requester);
+
+  return {
+    count: reportees.directReportees.length,
+    items: reportees.directReportees,
   };
 };
 

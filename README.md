@@ -7,6 +7,8 @@ Production-grade Employee Management System built as a TypeScript monorepo with 
 - JWT authentication with persistent client sessions
 - Role based access control for `SUPER_ADMIN`, `HR`, and `EMPLOYEE`
 - Employee CRUD with validation, profile image upload, pagination, search, filters, sorting, and soft delete
+- Recycle Bin with restore, permanent delete, and bulk actions
+- CSV employee import with template download, validation preview, duplicate detection, and valid-row import
 - Manager assignment with circular reporting prevention
 - Recursive organization tree, reportees API, and reporting chain
 - Dashboard analytics with responsive charts
@@ -71,11 +73,14 @@ npm install
 
 Use MongoDB Atlas. Set `MONGODB_URI` in `backend/.env`.
 
-Seed default users and demo employee profiles:
+Seed default users and 120 realistic employee profiles:
 
 ```bash
-npm run seed --workspace backend
+npm run seed
 ```
+
+The seed inserts employee profiles only when the employee collection is empty. To reseed employees, run `npm run seed -- --force`.
+To keep existing users and employees and add non-conflicting seed employees, run `npm run seed:append`.
 
 Default credentials:
 
@@ -120,6 +125,17 @@ Root:
 Backend:
 
 - `npm run seed --workspace backend`
+- `npm run seed:append --workspace backend`
+- `npm run db:seed --workspace backend`
+- `npm run db:seed:append --workspace backend`
+
+CSV import template headers:
+
+```csv
+Employee ID,Name,Email,Phone,Department,Designation,Salary,Joining Date,Status,Role,Manager,Profile Image
+```
+
+`Manager` may reference an existing or imported employee by email or employee ID. `Profile Image` is optional; missing images use the default avatar fallback.
 
 ## Deployment
 
@@ -155,7 +171,8 @@ See [docs/API.md](docs/API.md).
 - Helmet secures HTTP headers.
 - Production CORS is restricted through `CORS_ORIGIN`.
 - RBAC middleware protects privileged routes.
-- Only SUPER_ADMIN can change roles, assign managers, delete employees, or restore deleted employees.
+- SUPER_ADMIN can change roles, soft delete, restore, and permanently delete employees.
+- SUPER_ADMIN and HR can assign managers; circular reporting and inactive/deleted managers are rejected.
 - Employee manager assignment prevents circular reporting.
 
 ## Future Improvements

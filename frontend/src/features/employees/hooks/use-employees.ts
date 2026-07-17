@@ -5,6 +5,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { employeeService } from "@/services/employee.service";
 import type {
   Employee,
+  EmployeeBulkIdsPayload,
   EmployeeFormPayload,
   EmployeeManagerPayload,
   EmployeeListParams,
@@ -15,7 +16,11 @@ import type {
 export const employeeQueryKeys = {
   all: ["employees"] as const,
   chain: (id: string) => [...employeeQueryKeys.all, "chain", id] as const,
+  deletedList: (params: EmployeeListParams) =>
+    [...employeeQueryKeys.all, "recycle-bin", params] as const,
+  deletedLists: () => [...employeeQueryKeys.all, "recycle-bin"] as const,
   detail: (id: string) => [...employeeQueryKeys.all, "detail", id] as const,
+  directReports: (id: string) => [...employeeQueryKeys.all, "direct-reports", id] as const,
   lists: () => [...employeeQueryKeys.all, "list"] as const,
   list: (params: EmployeeListParams) => [...employeeQueryKeys.all, "list", params] as const,
   me: () => [...employeeQueryKeys.all, "me"] as const,
@@ -42,6 +47,16 @@ export function useEmployees(params: EmployeeListParams, enabled = true) {
   });
 }
 
+export function useDeletedEmployees(params: EmployeeListParams, enabled = true) {
+  return useQuery({
+    enabled,
+    placeholderData: keepPreviousData,
+    queryFn: () => employeeService.getDeletedEmployees(params),
+    queryKey: employeeQueryKeys.deletedList(params),
+    staleTime: 60_000,
+  });
+}
+
 export function useEmployeeChain(id: string, enabled = true) {
   return useQuery({
     enabled: enabled && Boolean(id),
@@ -56,6 +71,15 @@ export function useEmployeeReportees(id: string, enabled = true) {
     enabled: enabled && Boolean(id),
     queryFn: () => employeeService.getReportees(id),
     queryKey: employeeQueryKeys.reportees(id),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useEmployeeDirectReports(id: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && Boolean(id),
+    queryFn: () => employeeService.getDirectReports(id),
+    queryKey: employeeQueryKeys.directReports(id),
     staleTime: 5 * 60_000,
   });
 }
@@ -141,6 +165,7 @@ export function useDeleteEmployee() {
     mutationFn: (id: string) => employeeService.deleteEmployee(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.deletedLists() });
       void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
@@ -155,7 +180,48 @@ export function useRestoreEmployee() {
     onSuccess: (employee) => {
       queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
       void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.deletedLists() });
       void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
+  });
+}
+
+export function useRestoreEmployees() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: EmployeeBulkIdsPayload) => employeeService.restoreEmployees(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.deletedLists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => employeeService.permanentlyDeleteEmployee(id),
+    onSuccess: (employee) => {
+      queryClient.removeQueries({ queryKey: employeeQueryKeys.detail(employee.id) });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.deletedLists() });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteEmployees() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: EmployeeBulkIdsPayload) =>
+      employeeService.permanentlyDeleteEmployees(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.deletedLists() });
       void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
   });
@@ -200,7 +266,27 @@ export function useUpdateEmployeeManager() {
       queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
       void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.chain(employee.id) });
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.reportees(employee.id) });
+      void queryClient.invalidateQueries({ queryKey: [...employeeQueryKeys.all, "direct-reports"] });
+      void queryClient.invalidateQueries({ queryKey: [...employeeQueryKeys.all, "reportees"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
+  });
+}
+
+export function usePreviewEmployeeImport() {
+  return useMutation({
+    mutationFn: (file: File) => employeeService.previewEmployeeImport(file),
+  });
+}
+
+export function useImportEmployees() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => employeeService.importEmployees(file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
   });

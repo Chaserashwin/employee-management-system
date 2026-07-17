@@ -3,12 +3,20 @@ import { Router } from "express";
 import {
   createEmployee,
   deleteEmployee,
+  downloadEmployeeImportTemplate,
+  getDeletedEmployees,
+  getEmployeeDirectReportsById,
   getEmployeeChainById,
   getEmployeeById,
   getEmployeeManagerCandidates,
   getEmployeeReporteesById,
   getEmployees,
   getMyEmployeeProfile,
+  importEmployees,
+  permanentlyDeleteDeletedEmployee,
+  permanentlyDeleteDeletedEmployees,
+  previewEmployeeImport,
+  restoreDeletedEmployees,
   restoreDeletedEmployee,
   updateEmployee,
   updateEmployeeManager,
@@ -17,7 +25,7 @@ import {
   updateEmployeeStatus,
 } from "../controllers/employee.controller";
 import { authenticate, authorize, PERMISSIONS } from "../middlewares/auth.middleware";
-import { uploadProfileImage } from "../middlewares/upload.middleware";
+import { uploadEmployeeCsv, uploadProfileImage } from "../middlewares/upload.middleware";
 import {
   validateBody,
   validateBodyOrUploadedFile,
@@ -26,6 +34,7 @@ import {
 } from "../middlewares/validate.middleware";
 import {
   createEmployeeSchema,
+  employeeBulkIdsSchema,
   employeeIdParamSchema,
   employeeListQuerySchema,
   employeeManagerSchema,
@@ -44,6 +53,47 @@ employeeRouter.get(
   validateQuery(employeeListQuerySchema),
   getEmployees,
 );
+employeeRouter.get(
+  "/recycle-bin",
+  authorize(PERMISSIONS.EMPLOYEE_RESTORE),
+  validateQuery(employeeListQuerySchema),
+  getDeletedEmployees,
+);
+employeeRouter.patch(
+  "/recycle-bin/restore",
+  authorize(PERMISSIONS.EMPLOYEE_RESTORE),
+  validateBody(employeeBulkIdsSchema),
+  restoreDeletedEmployees,
+);
+employeeRouter.delete(
+  "/recycle-bin",
+  authorize(PERMISSIONS.EMPLOYEE_DELETE),
+  validateBody(employeeBulkIdsSchema),
+  permanentlyDeleteDeletedEmployees,
+);
+employeeRouter.delete(
+  "/recycle-bin/:id",
+  authorize(PERMISSIONS.EMPLOYEE_DELETE),
+  validateParams(employeeIdParamSchema),
+  permanentlyDeleteDeletedEmployee,
+);
+employeeRouter.get(
+  "/import/template",
+  authorize(PERMISSIONS.EMPLOYEE_CREATE),
+  downloadEmployeeImportTemplate,
+);
+employeeRouter.post(
+  "/import/preview",
+  authorize(PERMISSIONS.EMPLOYEE_CREATE),
+  uploadEmployeeCsv,
+  previewEmployeeImport,
+);
+employeeRouter.post(
+  "/import",
+  authorize(PERMISSIONS.EMPLOYEE_CREATE),
+  uploadEmployeeCsv,
+  importEmployees,
+);
 employeeRouter.get("/me", getMyEmployeeProfile);
 employeeRouter.patch(
   "/me",
@@ -57,6 +107,12 @@ employeeRouter.get(
   authorize(PERMISSIONS.HIERARCHY_VIEW),
   validateParams(employeeIdParamSchema),
   getEmployeeReporteesById,
+);
+employeeRouter.get(
+  "/:id/direct-reports",
+  authorize(PERMISSIONS.HIERARCHY_VIEW),
+  validateParams(employeeIdParamSchema),
+  getEmployeeDirectReportsById,
 );
 employeeRouter.get("/:id/chain", validateParams(employeeIdParamSchema), getEmployeeChainById);
 employeeRouter.get(

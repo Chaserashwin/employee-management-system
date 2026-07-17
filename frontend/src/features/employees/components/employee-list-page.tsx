@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -18,6 +18,7 @@ import {
   EMPLOYEE_STATUSES,
 } from "@/constants/employee";
 import { ConfirmDialog } from "@/features/employees/components/confirm-dialog";
+import { EmployeeImportDialog } from "@/features/employees/components/employee-import-dialog";
 import { EmployeeTable } from "@/features/employees/components/employee-table";
 import {
   useDeleteEmployee,
@@ -44,6 +45,7 @@ export function EmployeeListPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const debouncedSearch = useDebounce(search);
 
   const params = useMemo<EmployeeListParams>(
@@ -65,7 +67,8 @@ export function EmployeeListPage() {
   const updateStatusMutation = useUpdateEmployeeStatus();
 
   const canCreate = role === "SUPER_ADMIN" || role === "HR";
-  const employees = employeesQuery.data?.data ?? [];
+  const canOpenRecycleBin = role === "SUPER_ADMIN";
+  const employees = employeesQuery.data?.items ?? employeesQuery.data?.data ?? [];
   const pagination = employeesQuery.data?.pagination;
 
   if (role === "EMPLOYEE") {
@@ -116,12 +119,29 @@ export function EmployeeListPage() {
           </p>
         </div>
         {canCreate ? (
-          <Button asChild>
-            <Link href="/employees/new" onClick={() => startRouteNavigation("/employees/new")}>
-              <Plus className="size-4" aria-hidden="true" />
-              New Employee
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {canOpenRecycleBin ? (
+              <Button variant="outline" asChild>
+                <Link
+                  href="/employees/recycle-bin"
+                  onClick={() => startRouteNavigation("/employees/recycle-bin")}
+                >
+                  <Trash2 className="size-4" aria-hidden="true" />
+                  Recycle Bin
+                </Link>
+              </Button>
+            ) : null}
+            <Button variant="outline" type="button" onClick={() => setIsImportDialogOpen(true)}>
+              <Upload className="size-4" aria-hidden="true" />
+              Import Employees
+            </Button>
+            <Button asChild>
+              <Link href="/employees/new" onClick={() => startRouteNavigation("/employees/new")}>
+                <Plus className="size-4" aria-hidden="true" />
+                New Employee
+              </Link>
+            </Button>
+          </div>
         ) : null}
       </div>
 
@@ -273,7 +293,7 @@ export function EmployeeListPage() {
           <Button
             type="button"
             variant="outline"
-            disabled={page <= 1 || employeesQuery.isFetching}
+            disabled={!pagination?.hasPrevious || employeesQuery.isFetching}
             onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
           >
             Previous
@@ -281,9 +301,7 @@ export function EmployeeListPage() {
           <Button
             type="button"
             variant="outline"
-            disabled={
-              !pagination || page >= pagination.totalPages || employeesQuery.isFetching
-            }
+            disabled={!pagination?.hasNext || employeesQuery.isFetching}
             onClick={() => setPage((currentPage) => currentPage + 1)}
           >
             {employeesQuery.isFetching ? (
@@ -305,6 +323,11 @@ export function EmployeeListPage() {
         isPending={deleteEmployeeMutation.isPending}
         onCancel={() => setEmployeeToDelete(null)}
         onConfirm={() => void handleDelete()}
+      />
+
+      <EmployeeImportDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
       />
     </div>
   );

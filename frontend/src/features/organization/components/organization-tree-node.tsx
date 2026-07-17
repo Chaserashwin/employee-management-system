@@ -59,10 +59,10 @@ function OrganizationTreeNodeComponent({
         >
           <EmployeeAvatar employee={node} size="sm" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium">{node.name}</span>
-            <span className="block truncate text-xs text-muted-foreground">
-              {node.employeeId} - {node.designation}
-            </span>
+          <span className="block truncate text-sm font-medium">{node.name}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+              {node.employeeId} - {node.department} - {node.designation}
+          </span>
           </span>
         </button>
         <div className="hidden items-center gap-2 sm:flex">

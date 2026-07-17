@@ -25,7 +25,10 @@ const toSummary = (employee: EmployeeDocument) => ({
 const toRecord = (employee: EmployeeDocument, employeeMap: Map<string, EmployeeDocument>) => ({
   ...toSummary(employee),
   createdAt: employee.createdAt,
-  deleted: employee.deleted,
+  deleted: employee.deleted || employee.isDeleted,
+  deletedAt: employee.deletedAt ?? null,
+  deletedBy: employee.deletedBy ? String(employee.deletedBy) : null,
+  isDeleted: employee.deleted || employee.isDeleted,
   manager: employee.manager
     ? employeeMap.get(String(employee.manager))
       ? toSummary(employeeMap.get(String(employee.manager)) as EmployeeDocument)

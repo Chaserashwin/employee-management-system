@@ -82,6 +82,17 @@ export const employeeIdParamSchema = z.object({
     .refine((value) => mongoose.isValidObjectId(value), "Employee id must be valid."),
 });
 
+export const employeeBulkIdsSchema = z.object({
+  employeeIds: z
+    .array(
+      z
+        .string()
+        .trim()
+        .refine((value) => mongoose.isValidObjectId(value), "Employee id must be valid."),
+    )
+    .min(1, "Select at least one employee."),
+});
+
 export const employeeListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
@@ -98,4 +109,5 @@ export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>;
 export type EmployeeStatusInput = z.infer<typeof employeeStatusSchema>;
 export type EmployeeRoleInput = z.infer<typeof employeeRoleSchema>;
 export type EmployeeManagerInput = z.infer<typeof employeeManagerSchema>;
+export type EmployeeBulkIdsInput = z.infer<typeof employeeBulkIdsSchema>;
 export type EmployeeListQueryInput = z.infer<typeof employeeListQuerySchema>;

@@ -10,10 +10,13 @@ import {
 export interface EmployeeDocument extends Document {
   createdAt: Date;
   deleted: boolean;
+  deletedAt?: Date | null;
+  deletedBy?: Types.ObjectId | null;
   department: string;
   designation: string;
   email: string;
   employeeId: string;
+  isDeleted: boolean;
   joiningDate: Date;
   manager: Types.ObjectId | null;
   name: string;
@@ -110,6 +113,21 @@ const employeeSchema = new Schema<EmployeeDocument>(
       required: true,
       type: Boolean,
     },
+    isDeleted: {
+      default: false,
+      index: true,
+      required: true,
+      type: Boolean,
+    },
+    deletedAt: {
+      default: null,
+      type: Date,
+    },
+    deletedBy: {
+      default: null,
+      ref: "User",
+      type: Schema.Types.ObjectId,
+    },
   },
   {
     timestamps: true,
@@ -125,6 +143,10 @@ const employeeSchema = new Schema<EmployeeDocument>(
 employeeSchema.index({ deleted: 1, department: 1, role: 1, status: 1 });
 employeeSchema.index({ deleted: 1, name: 1 });
 employeeSchema.index({ deleted: 1, joiningDate: -1 });
+employeeSchema.index({ isDeleted: 1, department: 1, role: 1, status: 1 });
+employeeSchema.index({ isDeleted: 1, name: 1 });
+employeeSchema.index({ isDeleted: 1, joiningDate: -1 });
+employeeSchema.index({ manager: 1, isDeleted: 1, status: 1 });
 
 export const EmployeeModel =
   (models.Employee as Model<EmployeeDocument> | undefined) ||

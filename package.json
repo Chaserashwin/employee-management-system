@@ -12,7 +12,11 @@
     "frontend": "npm run dev --workspace frontend",
     "backend": "npm run dev --workspace backend",
     "build": "npm run build --workspace frontend && npm run build --workspace backend",
-    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
+    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
+    "seed": "npm run seed --workspace backend",
+    "seed:append": "npm run seed:append --workspace backend",
+    "db:seed": "npm run seed --workspace backend",
+    "db:seed:append": "npm run seed:append --workspace backend"
   },
   "overrides": {
     "postcss": "^8.5.10"

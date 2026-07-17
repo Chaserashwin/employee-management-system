@@ -6,21 +6,31 @@ import {
   changeEmployeeStatus,
   editEmployee,
   editOwnEmployeeProfile,
+  getEmployeeDirectReports,
   getEmployee,
   getEmployeeChain,
   getEmployeeReportees,
   getManagerCandidates,
   getOwnEmployeeProfile,
   listEmployees,
+  listDeletedEmployees,
   normalizeEmployeePayload,
+  permanentlyDeleteEmployee,
+  permanentlyDeleteEmployees,
   removeEmployee,
   restoreEmployee,
+  restoreEmployees,
 } from "../services/employee.service";
 import { AppError } from "../utils/app-error";
 import { asyncHandler } from "../utils/async-handler";
 import { createSuccessResponse } from "../utils/response";
 import { toUploadedEmployeeImageUrl } from "../middlewares/upload.middleware";
 import type { EmployeeListQuery, EmployeePayload, EmployeeUpdatePayload } from "../types/employee";
+import {
+  getEmployeeCsvTemplate,
+  importEmployeeCsv,
+  previewEmployeeCsvImport,
+} from "../services/employee-import.service";
 
 const getRequester = (requestUser: Express.Request["user"]) => {
   if (!requestUser) {
@@ -63,6 +73,17 @@ export const getEmployees = asyncHandler(async (request, response) => {
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employees, "Employees retrieved."));
 });
 
+export const getDeletedEmployees = asyncHandler(async (request, response) => {
+  const employees = await listDeletedEmployees(
+    request.query as unknown as EmployeeListQuery,
+    getRequester(request.user),
+  );
+
+  response
+    .status(HTTP_STATUS.OK)
+    .json(createSuccessResponse(employees, "Deleted employees retrieved."));
+});
+
 export const getEmployeeById = asyncHandler(async (request, response) => {
   const employee = await getEmployee(request.params.id, getRequester(request.user));
 
@@ -82,6 +103,31 @@ export const createEmployee = asyncHandler(async (request, response) => {
   const employee = await addEmployee(payload, getRequester(request.user));
 
   response.status(HTTP_STATUS.CREATED).json(createSuccessResponse(employee, "Employee created."));
+});
+
+export const previewEmployeeImport = asyncHandler(async (request, response) => {
+  const preview = await previewEmployeeCsvImport(request.file, getRequester(request.user));
+
+  response
+    .status(HTTP_STATUS.OK)
+    .json(createSuccessResponse(preview, "Employee import preview generated."));
+});
+
+export const importEmployees = asyncHandler(async (request, response) => {
+  const result = await importEmployeeCsv(request.file, getRequester(request.user));
+
+  response
+    .status(HTTP_STATUS.CREATED)
+    .json(createSuccessResponse(result, "Employee import completed."));
+});
+
+export const downloadEmployeeImportTemplate = asyncHandler(async (_request, response) => {
+  response.setHeader("Content-Type", "text/csv; charset=utf-8");
+  response.setHeader(
+    "Content-Disposition",
+    'attachment; filename="employee-import-template.csv"',
+  );
+  response.status(HTTP_STATUS.OK).send(getEmployeeCsvTemplate());
 });
 
 export const updateEmployee = asyncHandler(async (request, response) => {
@@ -109,7 +155,7 @@ export const updateMyEmployeeProfile = asyncHandler(async (request, response) =>
 });
 
 export const deleteEmployee = asyncHandler(async (request, response) => {
-  const employee = await removeEmployee(request.params.id);
+  const employee = await removeEmployee(request.params.id, getRequester(request.user));
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employee, "Employee deleted."));
 });
@@ -118,6 +164,28 @@ export const restoreDeletedEmployee = asyncHandler(async (request, response) => 
   const employee = await restoreEmployee(request.params.id);
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employee, "Employee restored."));
+});
+
+export const restoreDeletedEmployees = asyncHandler(async (request, response) => {
+  const result = await restoreEmployees(request.body.employeeIds);
+
+  response.status(HTTP_STATUS.OK).json(createSuccessResponse(result, "Employees restored."));
+});
+
+export const permanentlyDeleteDeletedEmployee = asyncHandler(async (request, response) => {
+  const employee = await permanentlyDeleteEmployee(request.params.id);
+
+  response
+    .status(HTTP_STATUS.OK)
+    .json(createSuccessResponse(employee, "Employee permanently deleted."));
+});
+
+export const permanentlyDeleteDeletedEmployees = asyncHandler(async (request, response) => {
+  const result = await permanentlyDeleteEmployees(request.body.employeeIds);
+
+  response
+    .status(HTTP_STATUS.OK)
+    .json(createSuccessResponse(result, "Employees permanently deleted."));
 });
 
 export const updateEmployeeStatus = asyncHandler(async (request, response) => {
@@ -141,7 +209,11 @@ export const updateEmployeeRole = asyncHandler(async (request, response) => {
 });
 
 export const updateEmployeeManager = asyncHandler(async (request, response) => {
-  const employee = await assignEmployeeManager(request.params.id, request.body.managerId ?? null);
+  const employee = await assignEmployeeManager(
+    request.params.id,
+    request.body.managerId ?? null,
+    getRequester(request.user),
+  );
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(employee, "Employee manager updated."));
 });
@@ -158,6 +230,17 @@ export const getEmployeeReporteesById = asyncHandler(async (request, response) =
   const reportees = await getEmployeeReportees(request.params.id, getRequester(request.user));
 
   response.status(HTTP_STATUS.OK).json(createSuccessResponse(reportees, "Reportees retrieved."));
+});
+
+export const getEmployeeDirectReportsById = asyncHandler(async (request, response) => {
+  const directReports = await getEmployeeDirectReports(
+    request.params.id,
+    getRequester(request.user),
+  );
+
+  response
+    .status(HTTP_STATUS.OK)
+    .json(createSuccessResponse(directReports, "Direct reports retrieved."));
 });
 
 export const getEmployeeChainById = asyncHandler(async (request, response) => {

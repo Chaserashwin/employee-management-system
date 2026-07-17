@@ -39,6 +39,8 @@ Query: `page`, `limit`, `search`, `department`, `role`, `status`, `sortBy`, `sor
 
 Returns employee records with pagination.
 
+List response data includes `items`, `totalItems`, `totalPages`, `page`, `limit`, `hasNext`, and `hasPrevious`. Legacy `data` and `pagination` fields are also returned for compatibility.
+
 ### GET `/api/employees/me`
 
 Returns the authenticated user's employee profile.
@@ -69,13 +71,63 @@ Updates employee profile fields and optional profile image.
 
 Roles: `SUPER_ADMIN`
 
-Soft deletes the employee.
+Soft deletes the employee and records `isDeleted`, `deletedAt`, and `deletedBy`.
+
+### GET `/api/employees/recycle-bin`
+
+Roles: `SUPER_ADMIN`
+
+Returns soft-deleted employee records with the same pagination, search, filter, and sort contract as `GET /api/employees`.
 
 ### PATCH `/api/employees/:id/restore`
 
 Roles: `SUPER_ADMIN`
 
 Restores a soft-deleted employee.
+
+### PATCH `/api/employees/recycle-bin/restore`
+
+Roles: `SUPER_ADMIN`
+
+Request: `{ "employeeIds": ["<employeeId>"] }`
+
+Bulk restores soft-deleted employees.
+
+### DELETE `/api/employees/recycle-bin/:id`
+
+Roles: `SUPER_ADMIN`
+
+Permanently deletes one soft-deleted employee.
+
+### DELETE `/api/employees/recycle-bin`
+
+Roles: `SUPER_ADMIN`
+
+Request: `{ "employeeIds": ["<employeeId>"] }`
+
+Permanently deletes selected soft-deleted employees.
+
+### GET `/api/employees/import/template`
+
+Roles: `SUPER_ADMIN`, `HR`
+
+Downloads a CSV template.
+
+### POST `/api/employees/import/preview`
+
+Roles: `SUPER_ADMIN`, `HR`
+
+Multipart field: `file`
+
+Validates a CSV and returns row-level errors plus row, valid, invalid, duplicate, and skipped counts. No employees are created.
+
+### POST `/api/employees/import`
+
+Roles: `SUPER_ADMIN`, `HR`
+
+Multipart field: `file`
+
+Revalidates the CSV and imports valid rows only. Invalid and duplicate rows are skipped.
 
 ### PATCH `/api/employees/:id/status`
 
@@ -93,7 +145,7 @@ Protections: SUPER_ADMIN cannot downgrade themselves.
 
 ### PATCH `/api/employees/:id/manager`
 
-Roles: `SUPER_ADMIN`
+Roles: `SUPER_ADMIN`, `HR`
 
 Request: `{ "managerId": "<employeeId>" }` or `{ "managerId": null }`
 
@@ -104,6 +156,12 @@ Protections: prevents self assignment, duplicate assignment, inactive/deleted ma
 Roles: `SUPER_ADMIN`, `HR`
 
 Returns direct and nested reportees.
+
+### GET `/api/employees/:id/direct-reports`
+
+Roles: `SUPER_ADMIN`, `HR`
+
+Returns direct reports as `{ "count": number, "items": OrganizationTreeNode[] }`.
 
 ### GET `/api/employees/:id/chain`
 

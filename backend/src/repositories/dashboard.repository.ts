@@ -1,6 +1,5 @@
 import { EmployeeModel } from "../models/employee.model";
-
-const ACTIVE_EMPLOYEE_FILTER = { deleted: false };
+import { ACTIVE_EMPLOYEE_FILTER } from "./employee.repository";
 
 export const getEmployeeDashboardCounts = async () => {
   const [totalEmployees, activeEmployees, inactiveEmployees, departments, managers, recentHires] =

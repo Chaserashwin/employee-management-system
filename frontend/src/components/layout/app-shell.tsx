@@ -7,6 +7,7 @@ import {
   LogOut,
   PanelLeft,
   Settings,
+  Trash2,
   UserRound,
   Users,
 } from "lucide-react";
@@ -34,6 +35,12 @@ const navigationItems: NavigationItem[] = [
     href: "/employees",
     icon: Users,
     roles: ["SUPER_ADMIN", "HR"],
+  },
+  {
+    title: "Recycle Bin",
+    href: "/employees/recycle-bin",
+    icon: Trash2,
+    roles: ["SUPER_ADMIN"],
   },
   {
     title: "Organization",
@@ -87,9 +94,13 @@ export function AppShell({ children }: AppShellProps) {
             const isActive =
               item.href === "/"
                 ? pathname === item.href
-                : pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`) ||
-                  (item.href === "/dashboard" && pathname === "/");
+                : item.href === "/employees"
+                  ? !pathname.startsWith("/employees/recycle-bin") &&
+                    (pathname === item.href ||
+                      /^\/employees\/(new|[^/]+)(\/edit)?$/.test(pathname))
+                  : pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`) ||
+                    (item.href === "/dashboard" && pathname === "/");
 
             return (
               <Link

@@ -1,7 +1,11 @@
 import { apiClient } from "@/services/api";
 import type { ApiResponse } from "@/types/api";
 import type {
+  DirectReportsResult,
   Employee,
+  EmployeeBulkIdsPayload,
+  EmployeeCsvImportPreview,
+  EmployeeCsvImportResult,
   EmployeeFormPayload,
   EmployeeListParams,
   EmployeeListResult,
@@ -36,11 +40,29 @@ const toEmployeeFormData = (payload: EmployeeFormPayload) => {
   return formData;
 };
 
+const toCsvFormData = (file: File) => {
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  return formData;
+};
+
 export const employeeService = {
   async getEmployees(params: EmployeeListParams) {
     const response = await apiClient.get<ApiResponse<EmployeeListResult>>("/api/employees", {
       params,
     });
+
+    return response.data.data;
+  },
+  async getDeletedEmployees(params: EmployeeListParams) {
+    const response = await apiClient.get<ApiResponse<EmployeeListResult>>(
+      "/api/employees/recycle-bin",
+      {
+        params,
+      },
+    );
 
     return response.data.data;
   },
@@ -77,6 +99,31 @@ export const employeeService = {
   },
   async restoreEmployee(id: string) {
     const response = await apiClient.patch<ApiResponse<Employee>>(`/api/employees/${id}/restore`);
+
+    return response.data.data;
+  },
+  async restoreEmployees(payload: EmployeeBulkIdsPayload) {
+    const response = await apiClient.patch<ApiResponse<{ matchedCount: number; modifiedCount: number }>>(
+      "/api/employees/recycle-bin/restore",
+      payload,
+    );
+
+    return response.data.data;
+  },
+  async permanentlyDeleteEmployee(id: string) {
+    const response = await apiClient.delete<ApiResponse<Employee>>(
+      `/api/employees/recycle-bin/${id}`,
+    );
+
+    return response.data.data;
+  },
+  async permanentlyDeleteEmployees(payload: EmployeeBulkIdsPayload) {
+    const response = await apiClient.delete<ApiResponse<{ deletedCount: number }>>(
+      "/api/employees/recycle-bin",
+      {
+        data: payload,
+      },
+    );
 
     return response.data.data;
   },
@@ -118,11 +165,41 @@ export const employeeService = {
 
     return response.data.data;
   },
+  async getDirectReports(id: string) {
+    const response = await apiClient.get<ApiResponse<DirectReportsResult>>(
+      `/api/employees/${id}/direct-reports`,
+    );
+
+    return response.data.data;
+  },
   async getChain(id: string) {
     const response = await apiClient.get<ApiResponse<EmployeeSummary[]>>(
       `/api/employees/${id}/chain`,
     );
 
     return response.data.data;
+  },
+  async previewEmployeeImport(file: File) {
+    const response = await apiClient.post<ApiResponse<EmployeeCsvImportPreview>>(
+      "/api/employees/import/preview",
+      toCsvFormData(file),
+    );
+
+    return response.data.data;
+  },
+  async importEmployees(file: File) {
+    const response = await apiClient.post<ApiResponse<EmployeeCsvImportResult>>(
+      "/api/employees/import",
+      toCsvFormData(file),
+    );
+
+    return response.data.data;
+  },
+  async downloadImportTemplate() {
+    const response = await apiClient.get<Blob>("/api/employees/import/template", {
+      responseType: "blob",
+    });
+
+    return response.data;
   },
 };
