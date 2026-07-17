@@ -27,5 +27,5 @@ COPY --from=builder /app/backend/package.json ./backend/package.json
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/backend/uploads ./backend/uploads
 
-EXPOSE 5000
+EXPOSE 5001
 CMD ["npm", "run", "start", "--workspace", "backend"]

@@ -28,5 +28,5 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/frontend ./frontend
 
-EXPOSE 3000
+EXPOSE 4000
 CMD ["npm", "run", "start", "--workspace", "frontend"]

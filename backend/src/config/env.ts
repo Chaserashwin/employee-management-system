@@ -2,7 +2,7 @@ import "dotenv/config";
 
 type NodeEnvironment = "development" | "production" | "test";
 
-const DEFAULT_PORT = 5000;
+const DEFAULT_PORT = 5001;
 const NODE_ENVIRONMENTS = ["development", "production", "test"] as const;
 
 const normalizeOptionalValue = (value: string | undefined) => {

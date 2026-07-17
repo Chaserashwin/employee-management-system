@@ -47,17 +47,17 @@ Tooling: npm workspaces, ESLint, Prettier, Docker.
 Frontend `frontend/.env`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5001
 ```
 
 Backend `backend/.env`:
 
 ```env
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb://localhost:27017/ems
 JWT_SECRET=replace-with-a-secure-secret
 NODE_ENV=development
-CORS_ORIGIN=http://localhost:3000
+CORS_ORIGIN=http://localhost:4000
 ```
 
 ## Installation
@@ -78,11 +78,11 @@ npm run seed --workspace backend
 
 Default credentials:
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Super Admin | `admin@ems.com` | `Password123` |
-| HR | `hr@ems.com` | `Password123` |
-| Employee | `employee@ems.com` | `Password123` |
+| Role        | Email              | Password      |
+| ----------- | ------------------ | ------------- |
+| Super Admin | `admin@ems.com`    | `Password123` |
+| HR          | `hr@ems.com`       | `Password123` |
+| Employee    | `employee@ems.com` | `Password123` |
 
 ## Run Locally
 
@@ -92,9 +92,9 @@ Start frontend and backend together:
 npm run dev
 ```
 
-Frontend: `http://localhost:3000`
+Frontend: `http://localhost:4000`
 
-Backend: `http://localhost:5000`
+Backend: `http://localhost:5001`
 
 ## Scripts
 
