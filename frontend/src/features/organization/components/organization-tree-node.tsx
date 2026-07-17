@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,15 @@ type OrganizationTreeNodeProps = {
   selectedId?: string;
 };
 
-export function OrganizationTreeNodeView({
+const containsNodeId = (node: OrganizationTreeNode, selectedId: string | undefined): boolean => {
+  if (!selectedId) {
+    return false;
+  }
+
+  return node.id === selectedId || node.reportees.some((reportee) => containsNodeId(reportee, selectedId));
+};
+
+function OrganizationTreeNodeComponent({
   node,
   onSelect,
   selectedId,
@@ -78,3 +86,12 @@ export function OrganizationTreeNodeView({
     </div>
   );
 }
+
+export const OrganizationTreeNodeView = memo(
+  OrganizationTreeNodeComponent,
+  (previous, next) =>
+    previous.node === next.node &&
+    previous.onSelect === next.onSelect &&
+    containsNodeId(previous.node, previous.selectedId) ===
+      containsNodeId(next.node, next.selectedId),
+);

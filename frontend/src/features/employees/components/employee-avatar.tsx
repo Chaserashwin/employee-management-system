@@ -1,4 +1,7 @@
+"use client";
+
 import { UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { getEmployeeImageUrl } from "@/features/employees/utils/employee-format";
 import { cn } from "@/lib/utils";
@@ -11,6 +14,11 @@ type EmployeeAvatarProps = {
 
 export function EmployeeAvatar({ employee, size = "md" }: EmployeeAvatarProps) {
   const imageUrl = getEmployeeImageUrl(employee);
+  const [hasImageError, setHasImageError] = useState(false);
+
+  useEffect(() => {
+    setHasImageError(false);
+  }, [imageUrl]);
 
   return (
     <div
@@ -21,9 +29,16 @@ export function EmployeeAvatar({ employee, size = "md" }: EmployeeAvatarProps) {
         size === "lg" && "size-20",
       )}
     >
-      {imageUrl ? (
+      {imageUrl && !hasImageError ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt={employee.name} className="size-full object-cover" />
+        <img
+          src={imageUrl}
+          alt={employee.name}
+          className="size-full object-cover"
+          decoding="async"
+          loading="lazy"
+          onError={() => setHasImageError(true)}
+        />
       ) : (
         <UserRound className={cn(size === "lg" ? "size-8" : "size-5")} aria-hidden="true" />
       )}

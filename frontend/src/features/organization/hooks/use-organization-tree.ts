@@ -13,5 +13,6 @@ export function useOrganizationTree(enabled = true) {
     enabled,
     queryFn: () => organizationService.getTree(),
     queryKey: organizationQueryKeys.tree,
+    staleTime: 5 * 60_000,
   });
 }

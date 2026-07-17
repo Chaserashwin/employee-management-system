@@ -19,6 +19,7 @@ import { searchRouter } from "./routes/search.routes";
 
 export const createApp = () => {
   const app = express();
+  const uploadsPath = path.resolve(process.cwd(), "uploads");
   const corsOptions: CorsOptions = {
     allowedHeaders: ["Authorization", "Content-Type"],
     credentials: false,
@@ -34,7 +35,16 @@ export const createApp = () => {
   app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true }));
-  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+  app.use(
+    "/uploads",
+    express.static(uploadsPath, {
+      immutable: true,
+      maxAge: "30d",
+      setHeaders(response) {
+        response.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      },
+    }),
+  );
 
   app.get("/health", (_request, response) => {
     response.status(200).json({

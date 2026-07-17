@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +15,11 @@ import type { OrganizationTreeNode } from "@/types/employee";
 export function OrganizationPage() {
   const treeQuery = useOrganizationTree();
   const [selectedNode, setSelectedNode] = useState<OrganizationTreeNode | null>(null);
-  const tree = treeQuery.data ?? [];
-  const activeNode = selectedNode ?? tree[0] ?? null;
+  const tree = useMemo(() => treeQuery.data ?? [], [treeQuery.data]);
+  const activeNode = useMemo(() => selectedNode ?? tree[0] ?? null, [selectedNode, tree]);
+  const handleSelectNode = useCallback((node: OrganizationTreeNode) => {
+    setSelectedNode(node);
+  }, []);
 
   return (
     <div className="space-y-5">
@@ -52,7 +55,7 @@ export function OrganizationPage() {
                     key={node.id}
                     node={node}
                     selectedId={activeNode?.id}
-                    onSelect={setSelectedNode}
+                    onSelect={handleSelectNode}
                   />
                 ))}
               </div>

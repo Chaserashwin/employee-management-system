@@ -36,6 +36,14 @@ export const findEmployeeByEmailIncludingDeleted = (email: string) => {
   return EmployeeModel.findOne({ email }).exec();
 };
 
+export const findEmployeesByIds = (ids: string[]) => {
+  if (ids.length === 0) {
+    return Promise.resolve([]);
+  }
+
+  return EmployeeModel.find({ _id: { $in: ids }, deleted: false }).exec();
+};
+
 export const findAllEmployees = () => {
   return EmployeeModel.find({ deleted: false }).sort({ name: 1, _id: 1 }).exec();
 };

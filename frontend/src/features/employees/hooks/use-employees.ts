@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { employeeService } from "@/services/employee.service";
 import type {
@@ -15,6 +15,7 @@ export const employeeQueryKeys = {
   all: ["employees"] as const,
   chain: (id: string) => [...employeeQueryKeys.all, "chain", id] as const,
   detail: (id: string) => [...employeeQueryKeys.all, "detail", id] as const,
+  lists: () => [...employeeQueryKeys.all, "list"] as const,
   list: (params: EmployeeListParams) => [...employeeQueryKeys.all, "list", params] as const,
   managerCandidates: (id: string) =>
     [...employeeQueryKeys.all, "manager-candidates", id] as const,
@@ -25,14 +26,17 @@ export function useMyEmployeeProfile() {
   return useQuery({
     queryFn: () => employeeService.getMyProfile(),
     queryKey: [...employeeQueryKeys.all, "me"] as const,
+    staleTime: 5 * 60_000,
   });
 }
 
 export function useEmployees(params: EmployeeListParams, enabled = true) {
   return useQuery({
     enabled,
+    placeholderData: keepPreviousData,
     queryFn: () => employeeService.getEmployees(params),
     queryKey: employeeQueryKeys.list(params),
+    staleTime: 60_000,
   });
 }
 
@@ -41,6 +45,7 @@ export function useEmployeeChain(id: string, enabled = true) {
     enabled: enabled && Boolean(id),
     queryFn: () => employeeService.getChain(id),
     queryKey: employeeQueryKeys.chain(id),
+    staleTime: 5 * 60_000,
   });
 }
 
@@ -49,6 +54,7 @@ export function useEmployeeReportees(id: string, enabled = true) {
     enabled: enabled && Boolean(id),
     queryFn: () => employeeService.getReportees(id),
     queryKey: employeeQueryKeys.reportees(id),
+    staleTime: 5 * 60_000,
   });
 }
 
@@ -57,6 +63,7 @@ export function useManagerCandidates(id: string, enabled = true) {
     enabled: enabled && Boolean(id),
     queryFn: () => employeeService.getManagerCandidates(id),
     queryKey: employeeQueryKeys.managerCandidates(id),
+    staleTime: 2 * 60_000,
   });
 }
 
@@ -65,6 +72,7 @@ export function useEmployee(id: string) {
     enabled: Boolean(id),
     queryFn: () => employeeService.getEmployee(id),
     queryKey: employeeQueryKeys.detail(id),
+    staleTime: 5 * 60_000,
   });
 }
 
@@ -73,7 +81,12 @@ export function useCreateEmployee() {
 
   return useMutation({
     mutationFn: (payload: EmployeeFormPayload) => employeeService.createEmployee(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all }),
+    onSuccess: (employee) => {
+      queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
   });
 }
 
@@ -82,9 +95,11 @@ export function useUpdateEmployee(id: string) {
 
   return useMutation({
     mutationFn: (payload: EmployeeFormPayload) => employeeService.updateEmployee(id, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all });
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.detail(id) });
+    onSuccess: (employee) => {
+      queryClient.setQueryData(employeeQueryKeys.detail(id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
   });
 }
@@ -94,7 +109,11 @@ export function useDeleteEmployee() {
 
   return useMutation({
     mutationFn: (id: string) => employeeService.deleteEmployee(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
   });
 }
 
@@ -103,7 +122,12 @@ export function useRestoreEmployee() {
 
   return useMutation({
     mutationFn: (id: string) => employeeService.restoreEmployee(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all }),
+    onSuccess: (employee) => {
+      queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
+    },
   });
 }
 
@@ -114,8 +138,10 @@ export function useUpdateEmployeeStatus() {
     mutationFn: ({ id, payload }: { id: string; payload: EmployeeStatusPayload }) =>
       employeeService.updateEmployeeStatus(id, payload),
     onSuccess: (employee) => {
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all });
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.detail(employee.id) });
+      queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
   });
 }
@@ -127,8 +153,9 @@ export function useUpdateEmployeeRole() {
     mutationFn: ({ id, payload }: { id: string; payload: EmployeeRolePayload }) =>
       employeeService.updateEmployeeRole(id, payload),
     onSuccess: (employee) => {
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all });
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.detail(employee.id) });
+      queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
@@ -140,8 +167,10 @@ export function useUpdateEmployeeManager() {
     mutationFn: ({ id, payload }: { id: string; payload: EmployeeManagerPayload }) =>
       employeeService.updateEmployeeManager(id, payload),
     onSuccess: (employee) => {
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.all });
-      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.detail(employee.id) });
+      queryClient.setQueryData(employeeQueryKeys.detail(employee.id), employee);
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.chain(employee.id) });
+      void queryClient.invalidateQueries({ queryKey: employeeQueryKeys.reportees(employee.id) });
       void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
   });

@@ -19,6 +19,7 @@ import {
   findEmployeeByEmail,
   findEmployeeByEmailIncludingDeleted,
   findEmployeeById,
+  findEmployeesByIds,
   findEmployees,
   findManagerCandidates,
   restoreEmployeeById,
@@ -65,6 +66,19 @@ const toEmployeeSummary = (employee: EmployeeDocument): EmployeeSummary => ({
 
 const createEmployeeMap = (employees: EmployeeDocument[]) => {
   return new Map(employees.map((employee) => [getDocumentId(employee), employee]));
+};
+
+const getManagerMapForEmployees = async (employees: EmployeeDocument[]) => {
+  const managerIds = [
+    ...new Set(
+      employees
+        .map(getManagerId)
+        .filter((managerId): managerId is string => Boolean(managerId)),
+    ),
+  ];
+  const managers = await findEmployeesByIds(managerIds);
+
+  return createEmployeeMap([...employees, ...managers]);
 };
 
 const createChildrenMap = (employees: EmployeeDocument[]) => {
@@ -217,8 +231,7 @@ export const listEmployees = async (
   }
 
   const { employees, totalRecords } = await findEmployees(query);
-  const allEmployees = await findAllEmployees();
-  const employeeMap = createEmployeeMap(allEmployees);
+  const employeeMap = await getManagerMapForEmployees(employees);
   const totalPages = Math.max(Math.ceil(totalRecords / query.limit), 1);
 
   return {
@@ -236,8 +249,7 @@ export const getEmployee = async (id: string, requester: AuthenticatedUser) => {
   const employee = await getEmployeeOrThrow(id);
   assertEmployeeAccess(employee, requester);
 
-  const allEmployees = await findAllEmployees();
-  return toEmployeeRecord(employee, createEmployeeMap(allEmployees));
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const getOwnEmployeeProfile = async (requester: AuthenticatedUser) => {
@@ -247,8 +259,7 @@ export const getOwnEmployeeProfile = async (requester: AuthenticatedUser) => {
     throw new AppError("Employee profile not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  const allEmployees = await findAllEmployees();
-  return toEmployeeRecord(employee, createEmployeeMap(allEmployees));
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const addEmployee = async (payload: EmployeePayload, requester: AuthenticatedUser) => {
@@ -257,7 +268,7 @@ export const addEmployee = async (payload: EmployeePayload, requester: Authentic
   try {
     const employee = await createEmployee(payload);
 
-    return toEmployeeRecord(employee);
+    return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
   } catch (error) {
     if (isDuplicateKeyError(error)) {
       throw createDuplicateEmployeeError();
@@ -283,8 +294,7 @@ export const editEmployee = async (
       throw new AppError("Employee not found.", HTTP_STATUS.NOT_FOUND);
     }
 
-    const allEmployees = await findAllEmployees();
-    return toEmployeeRecord(employee, createEmployeeMap(allEmployees));
+    return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
   } catch (error) {
     if (isDuplicateKeyError(error)) {
       throw createDuplicateEmployeeError();
@@ -315,8 +325,7 @@ export const editOwnEmployeeProfile = async (
     throw new AppError("Employee profile not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  const allEmployees = await findAllEmployees();
-  return toEmployeeRecord(updatedEmployee, createEmployeeMap(allEmployees));
+  return toEmployeeRecord(updatedEmployee, await getManagerMapForEmployees([updatedEmployee]));
 };
 
 export const removeEmployee = async (id: string) => {
@@ -326,7 +335,7 @@ export const removeEmployee = async (id: string) => {
     throw new AppError("Employee not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  return toEmployeeRecord(employee);
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const restoreEmployee = async (id: string) => {
@@ -336,7 +345,7 @@ export const restoreEmployee = async (id: string) => {
     throw new AppError("Deleted employee not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  return toEmployeeRecord(employee);
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const changeEmployeeStatus = async (
@@ -353,7 +362,7 @@ export const changeEmployeeStatus = async (
     throw new AppError("Employee not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  return toEmployeeRecord(employee);
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const changeEmployeeRole = async (
@@ -378,7 +387,7 @@ export const changeEmployeeRole = async (
     throw new AppError("Employee not found.", HTTP_STATUS.NOT_FOUND);
   }
 
-  return toEmployeeRecord(employee);
+  return toEmployeeRecord(employee, await getManagerMapForEmployees([employee]));
 };
 
 export const assignEmployeeManager = async (

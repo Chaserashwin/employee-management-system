@@ -4,7 +4,7 @@ import {
   getMonthlyJoiningTrend,
   getRecentEmployees,
 } from "../repositories/dashboard.repository";
-import { findAllEmployees, searchEmployees } from "../repositories/employee.repository";
+import { findEmployeesByIds, searchEmployees } from "../repositories/employee.repository";
 import type { DashboardSummary, GlobalSearchResult } from "../types/dashboard";
 import type { EmployeeDocument } from "../models/employee.model";
 
@@ -35,6 +35,21 @@ const toRecord = (employee: EmployeeDocument, employeeMap: Map<string, EmployeeD
   updatedAt: employee.updatedAt,
 });
 
+const createEmployeeMapWithManagers = async (employees: EmployeeDocument[]) => {
+  const managerIds = [
+    ...new Set(
+      employees
+        .map((employee) => (employee.manager ? String(employee.manager) : null))
+        .filter((managerId): managerId is string => Boolean(managerId)),
+    ),
+  ];
+  const managers = await findEmployeesByIds(managerIds);
+
+  return new Map(
+    [...employees, ...managers].map((employee) => [employee.id as string, employee]),
+  );
+};
+
 const toBuckets = (values: Array<{ _id: string; value: number }>) =>
   values.map((item) => ({
     label: item._id || "Unassigned",
@@ -56,7 +71,6 @@ export const getDashboardSummary = async (): Promise<DashboardSummary> => {
     employeeStatus,
     monthlyJoiningTrend,
     recentEmployees,
-    allEmployees,
   ] = await Promise.all([
     getEmployeeDashboardCounts(),
     getDistribution("department"),
@@ -64,9 +78,8 @@ export const getDashboardSummary = async (): Promise<DashboardSummary> => {
     getDistribution("status"),
     getMonthlyJoiningTrend(),
     getRecentEmployees(),
-    findAllEmployees(),
   ]);
-  const employeeMap = new Map(allEmployees.map((employee) => [employee.id as string, employee]));
+  const employeeMap = await createEmployeeMapWithManagers(recentEmployees);
 
   return {
     cards,
