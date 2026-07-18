@@ -1,3 +1,6 @@
+import "../types/express";
+import "multer";
+
 import {
   EMPLOYEE_DEPARTMENTS,
   EMPLOYEE_DESIGNATIONS,
@@ -6,6 +9,15 @@ import {
   type EmployeeRole,
   type EmployeeStatus,
 } from "../constants/employee";
+import {
+  createEmptyEmployeeCsvData,
+  EMPLOYEE_CSV_HEADERS,
+  EMPLOYEE_CSV_REQUIRED_COLUMNS,
+  getEmployeeCsvFieldKey,
+  getEmployeeCsvHeaderLabel,
+  type CsvEmployeeData,
+  type EmployeeCsvFieldKey,
+} from "../constants/employee-csv";
 import { HTTP_STATUS } from "../constants/http-status";
 import { ACTIVE_EMPLOYEE_FILTER } from "../repositories/employee.repository";
 import { EmployeeModel, type EmployeeDocument } from "../models/employee.model";
@@ -20,21 +32,6 @@ import type {
 } from "../types/employee";
 import { AppError } from "../utils/app-error";
 
-type CsvEmployeeData = {
-  department: string;
-  designation: string;
-  email: string;
-  employeeId: string;
-  joiningDate: string;
-  manager: string;
-  name: string;
-  phone: string;
-  profileImage: string;
-  role: string;
-  salary: string;
-  status: string;
-};
-
 type ValidatedImportRow = EmployeeCsvImportRow & {
   managerEmployeeId: string | null;
   payload: EmployeePayload;
@@ -43,83 +40,11 @@ type ValidatedImportRow = EmployeeCsvImportRow & {
 const phoneRegex = /^[0-9+\-\s()]{7,20}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const EMPLOYEE_CSV_TEMPLATE_HEADERS = [
-  "Employee ID",
-  "Name",
-  "Email",
-  "Phone",
-  "Department",
-  "Designation",
-  "Salary",
-  "Joining Date",
-  "Status",
-  "Role",
-  "Manager",
-  "Profile Image",
-] as const;
+export { EMPLOYEE_CSV_HEADERS, EMPLOYEE_CSV_REQUIRED_HEADERS } from "../constants/employee-csv";
 
-const requiredFieldKeys: Array<keyof CsvEmployeeData> = [
-  "employeeId",
-  "name",
-  "email",
-  "phone",
-  "department",
-  "designation",
-  "salary",
-  "joiningDate",
-  "status",
-  "role",
-];
+export const EMPLOYEE_CSV_TEMPLATE_HEADERS = EMPLOYEE_CSV_HEADERS;
 
-const headerKeyByNormalizedHeader: Record<string, keyof CsvEmployeeData> = {
-  department: "department",
-  designation: "designation",
-  email: "email",
-  employeeid: "employeeId",
-  employee_id: "employeeId",
-  joiningdate: "joiningDate",
-  joining_date: "joiningDate",
-  manager: "manager",
-  name: "name",
-  phone: "phone",
-  profileimage: "profileImage",
-  profile_image: "profileImage",
-  role: "role",
-  salary: "salary",
-  status: "status",
-};
-
-const labelByFieldKey: Record<keyof CsvEmployeeData, string> = {
-  department: "Department",
-  designation: "Designation",
-  email: "Email",
-  employeeId: "Employee ID",
-  joiningDate: "Joining Date",
-  manager: "Manager",
-  name: "Name",
-  phone: "Phone",
-  profileImage: "Profile Image",
-  role: "Role",
-  salary: "Salary",
-  status: "Status",
-};
-
-const emptyCsvEmployeeData = (): CsvEmployeeData => ({
-  department: "",
-  designation: "",
-  email: "",
-  employeeId: "",
-  joiningDate: "",
-  manager: "",
-  name: "",
-  phone: "",
-  profileImage: "",
-  role: "",
-  salary: "",
-  status: "",
-});
-
-const normalizeHeader = (value: string) => value.trim().toLowerCase().replace(/[\s-]+/g, "");
+const requiredFieldKeys = EMPLOYEE_CSV_REQUIRED_COLUMNS.map((column) => column.key);
 
 const normalizeLookupValue = (value: string) => value.trim().toLowerCase();
 
@@ -181,11 +106,11 @@ const parseCsv = (content: string) => {
   return rows.filter((row) => row.some((cell) => cell.trim().length > 0));
 };
 
-const getHeaderIndexes = (headerRow: string[]) => {
-  const headerIndexes = new Map<keyof CsvEmployeeData, number>();
+export const getEmployeeCsvHeaderIndexes = (headerRow: string[]) => {
+  const headerIndexes = new Map<EmployeeCsvFieldKey, number>();
 
   headerRow.forEach((header, index) => {
-    const key = headerKeyByNormalizedHeader[normalizeHeader(header)];
+    const key = getEmployeeCsvFieldKey(header);
 
     if (key && !headerIndexes.has(key)) {
       headerIndexes.set(key, index);
@@ -196,7 +121,7 @@ const getHeaderIndexes = (headerRow: string[]) => {
 
   if (missingHeaders.length > 0) {
     throw new AppError(
-      `Missing required CSV headers: ${missingHeaders.map((key) => labelByFieldKey[key]).join(", ")}.`,
+      `Missing required CSV headers: ${missingHeaders.map(getEmployeeCsvHeaderLabel).join(", ")}.`,
       HTTP_STATUS.BAD_REQUEST,
     );
   }
@@ -206,9 +131,9 @@ const getHeaderIndexes = (headerRow: string[]) => {
 
 const rowToEmployeeData = (
   row: string[],
-  headerIndexes: Map<keyof CsvEmployeeData, number>,
+  headerIndexes: Map<EmployeeCsvFieldKey, number>,
 ): CsvEmployeeData => {
-  const data = emptyCsvEmployeeData();
+  const data = createEmptyEmployeeCsvData();
 
   for (const [key, index] of headerIndexes.entries()) {
     data[key] = row[index]?.trim() ?? "";
@@ -294,7 +219,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
   }
 
   const [headerRow, ...dataRows] = parsedRows;
-  const headerIndexes = getHeaderIndexes(headerRow);
+  const headerIndexes = getEmployeeCsvHeaderIndexes(headerRow);
   const rows: ValidatedImportRow[] = dataRows.map((row, index) => {
     const data = rowToEmployeeData(row, headerIndexes);
 
@@ -328,7 +253,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
   for (const row of rows) {
     for (const key of requiredFieldKeys) {
       if (!row.data[key]) {
-        row.errors.push(`${labelByFieldKey[key]} is required.`);
+        row.errors.push(`${getEmployeeCsvHeaderLabel(key)} is required.`);
       }
     }
 
@@ -336,7 +261,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
     const employeeIdKey = normalizeLookupValue(row.data.employeeId);
 
     if (emailKey && seenEmails.has(emailKey)) {
-      row.errors.push(`Duplicate email in CSV; first seen on row ${seenEmails.get(emailKey)}.`);
+      row.errors.push(`Duplicate Email in CSV; first seen on row ${seenEmails.get(emailKey)}.`);
       row.isDuplicate = true;
     } else if (emailKey) {
       seenEmails.set(emailKey, row.rowNumber);
@@ -344,7 +269,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
 
     if (employeeIdKey && seenEmployeeIds.has(employeeIdKey)) {
       row.errors.push(
-        `Duplicate employee ID in CSV; first seen on row ${seenEmployeeIds.get(employeeIdKey)}.`,
+        `Duplicate Employee ID in CSV; first seen on row ${seenEmployeeIds.get(employeeIdKey)}.`,
       );
       row.isDuplicate = true;
     } else if (employeeIdKey) {
@@ -660,7 +585,7 @@ export const getEmployeeCsvTemplate = () => {
     return `"${value.replace(/"/g, "\"\"")}"`;
   };
 
-  return [EMPLOYEE_CSV_TEMPLATE_HEADERS, ...sampleRows]
+  return [EMPLOYEE_CSV_HEADERS, ...sampleRows]
     .map((row) => row.map(escapeCell).join(","))
     .join("\n");
 };
