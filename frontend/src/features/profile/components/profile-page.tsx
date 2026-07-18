@@ -60,11 +60,13 @@ export function ProfilePage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-4 rounded-lg border bg-background p-5 sm:flex-row sm:items-center">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="flex flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
         <EmployeeAvatar employee={employee} size="lg" />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-2xl font-semibold tracking-normal">{employee.name}</h1>
+          <h1 className="truncate text-xl font-semibold tracking-normal sm:text-2xl">
+            {employee.name}
+          </h1>
           <p className="text-sm text-muted-foreground">{employee.designation}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="muted">{user?.role ?? employee.role}</Badge>
@@ -75,12 +77,12 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Employee Details</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base tracking-normal sm:text-lg">Employee Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-2 sm:gap-4 sm:p-6 sm:pt-0">
             {fields.map(([label, value]) => (
               <div className="rounded-md border p-3" key={label}>
                 <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
@@ -90,12 +92,12 @@ export function ProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg tracking-normal">Reporting Chain</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base tracking-normal sm:text-lg">Reporting Chain</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 p-4 pt-0 sm:p-6 sm:pt-0">
               {chainQuery.isLoading ? (
                 <Skeleton className="h-16 w-full" />
               ) : chainQuery.data && chainQuery.data.length > 0 ? (
@@ -115,13 +117,13 @@ export function ProfilePage() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg tracking-normal">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base tracking-normal sm:text-lg">
                 <KeyRound className="size-4" aria-hidden="true" />
                 Password
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input id="currentPassword" type="password" autoComplete="current-password" />
@@ -130,7 +132,7 @@ export function ProfilePage() {
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input id="newPassword" type="password" autoComplete="new-password" />
               </div>
-              <Button type="button" disabled>
+              <Button type="button" className="w-full sm:w-auto" disabled>
                 Change Password
               </Button>
             </CardContent>

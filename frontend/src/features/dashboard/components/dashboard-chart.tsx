@@ -34,12 +34,12 @@ function DashboardChartComponent({ data, title, type }: DashboardChartProps) {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base tracking-normal">{title}</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-sm tracking-normal sm:text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-72">
+      <CardContent className="min-w-0 p-4 pt-0 sm:p-6 sm:pt-0">
+        <div className="h-52 min-w-0 sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
             {type === "pie" ? (
               <PieChart>

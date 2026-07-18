@@ -29,9 +29,9 @@ export function ConfirmDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-3 backdrop-blur-sm sm:px-4">
       <div
-        className="w-full max-w-sm rounded-lg border bg-background p-5 shadow-lg"
+        className="w-full max-w-sm rounded-lg border bg-background p-4 shadow-lg sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
@@ -42,11 +42,23 @@ export function ConfirmDialog({
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">{description}</p>
         </div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+        <div className="mt-5 grid gap-2 sm:flex sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={onCancel}
+            disabled={isPending}
+          >
             Cancel
           </Button>
-          <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={isPending}>
+          <Button
+            type="button"
+            variant={confirmVariant}
+            className="w-full sm:w-auto"
+            onClick={onConfirm}
+            disabled={isPending}
+          >
             {confirmLabel}
           </Button>
         </div>

@@ -110,18 +110,18 @@ export function EmployeeListPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-normal">Employees</h1>
+          <h1 className="text-xl font-semibold tracking-normal sm:text-2xl">Employees</h1>
           <p className="text-sm text-muted-foreground">
             Manage employee records, status, and profile details.
           </p>
         </div>
         {canCreate ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap">
             {canOpenRecycleBin ? (
-              <Button variant="outline" asChild>
+              <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
                 <Link
                   href="/employees/recycle-bin"
                   onClick={() => startRouteNavigation("/employees/recycle-bin")}
@@ -131,11 +131,16 @@ export function EmployeeListPage() {
                 </Link>
               </Button>
             ) : null}
-            <Button variant="outline" type="button" onClick={() => setIsImportDialogOpen(true)}>
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full justify-center sm:w-auto"
+              onClick={() => setIsImportDialogOpen(true)}
+            >
               <Upload className="size-4" aria-hidden="true" />
               Import Employees
             </Button>
-            <Button asChild>
+            <Button className="w-full justify-center sm:w-auto" asChild>
               <Link href="/employees/new" onClick={() => startRouteNavigation("/employees/new")}>
                 <Plus className="size-4" aria-hidden="true" />
                 New Employee
@@ -146,7 +151,7 @@ export function EmployeeListPage() {
       </div>
 
       <Card>
-        <CardContent className="grid gap-4 p-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
+        <CardContent className="grid gap-3 p-3 sm:grid-cols-2 sm:gap-4 sm:p-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
           <div className="space-y-2">
             <Label htmlFor="search">Search</Label>
             <div className="relative">
@@ -274,14 +279,14 @@ export function EmployeeListPage() {
             ? `${pagination.totalRecords} records, page ${pagination.currentPage} of ${pagination.totalPages}`
             : "Loading records"}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="grid w-full grid-cols-[6rem_1fr_1fr] items-center gap-2 sm:flex sm:w-auto">
           <Select
             value={String(limit)}
             onChange={(event) => {
               setLimit(Number(event.target.value));
               resetPage();
             }}
-            className="h-9 w-24"
+            className="h-10 w-full sm:h-9 sm:w-24"
             aria-label="Page size"
           >
             {EMPLOYEE_PAGE_SIZES.map((pageSize) => (
@@ -293,6 +298,7 @@ export function EmployeeListPage() {
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             disabled={!pagination?.hasPrevious || employeesQuery.isFetching}
             onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
           >
@@ -301,6 +307,7 @@ export function EmployeeListPage() {
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             disabled={!pagination?.hasNext || employeesQuery.isFetching}
             onClick={() => setPage((currentPage) => currentPage + 1)}
           >

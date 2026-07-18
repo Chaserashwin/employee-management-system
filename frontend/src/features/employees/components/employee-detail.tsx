@@ -114,24 +114,30 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <EmployeeAvatar employee={employee} size="lg" />
-          <div>
-            <h1 className="text-2xl font-semibold tracking-normal">{employee.name}</h1>
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-semibold tracking-normal sm:text-2xl">
+              {employee.name}
+            </h1>
             <p className="text-sm text-muted-foreground">{employee.designation}</p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid gap-2 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap">
           {canAssignManager ? (
-            <Button variant="outline" onClick={() => setIsManagerDialogOpen(true)}>
+            <Button
+              variant="outline"
+              className="w-full justify-center sm:w-auto"
+              onClick={() => setIsManagerDialogOpen(true)}
+            >
               <GitFork className="size-4" aria-hidden="true" />
               Assign Manager
             </Button>
           ) : null}
           {canEdit ? (
-            <Button asChild>
+            <Button className="w-full justify-center sm:w-auto" asChild>
               <Link
                 href={`/employees/${employee.id}/edit`}
                 onClick={() => startRouteNavigation(`/employees/${employee.id}/edit`)}
@@ -145,10 +151,10 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg tracking-normal">Profile Details</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base tracking-normal sm:text-lg">Profile Details</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-2 sm:gap-4 sm:p-6 sm:pt-0 lg:grid-cols-3">
           {fields.map(([label, value]) => (
             <div className="rounded-md border p-3" key={label}>
               <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
@@ -175,12 +181,12 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Reporting Chain</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base tracking-normal sm:text-lg">Reporting Chain</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {chainQuery.isLoading ? (
               <Skeleton className="h-20 w-full" />
             ) : chainQuery.data && chainQuery.data.length > 0 ? (
@@ -207,10 +213,10 @@ export function EmployeeDetail({ employee, isLoading }: EmployeeDetailProps) {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Direct Reports</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base tracking-normal sm:text-lg">Direct Reports</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {directReportsQuery.isLoading ? (
               <Skeleton className="h-20 w-full" />
             ) : directReportsQuery.data ? (

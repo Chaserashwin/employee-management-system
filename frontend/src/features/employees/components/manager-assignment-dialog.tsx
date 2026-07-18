@@ -66,9 +66,9 @@ export function ManagerAssignmentDialog({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-3 backdrop-blur-sm sm:px-4">
       <div
-        className="w-full max-w-xl rounded-lg border bg-background p-5 shadow-lg"
+        className="w-full max-w-xl rounded-lg border bg-background p-4 shadow-lg sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="manager-dialog-title"
@@ -109,16 +109,23 @@ export function ManagerAssignmentDialog({
           )}
         </div>
 
-        <div className="mt-5 flex justify-between gap-2">
+        <div className="mt-5 grid gap-2 sm:flex sm:justify-between">
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             disabled={isPending || !employee.manager}
             onClick={() => onAssign(null)}
           >
             Clear Manager
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={onCancel}
+            disabled={isPending}
+          >
             Close
           </Button>
         </div>

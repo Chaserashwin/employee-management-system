@@ -31,9 +31,9 @@ function OrganizationTreeNodeComponent({
   const hasReportees = node.reportees.length > 0;
 
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <div
-        className={`flex items-center gap-3 rounded-lg border bg-background p-3 ${
+        className={`flex min-w-0 items-center gap-2 rounded-lg border bg-background p-2.5 sm:gap-3 sm:p-3 ${
           selectedId === node.id ? "ring-1 ring-primary" : ""
         }`}
       >
@@ -41,7 +41,7 @@ function OrganizationTreeNodeComponent({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-8"
+          className="size-9 sm:size-8"
           disabled={!hasReportees}
           onClick={() => setIsExpanded((currentValue) => !currentValue)}
           aria-label={isExpanded ? "Collapse reportees" : "Expand reportees"}
@@ -54,15 +54,15 @@ function OrganizationTreeNodeComponent({
         </Button>
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left sm:gap-3"
           onClick={() => onSelect(node)}
         >
           <EmployeeAvatar employee={node} size="sm" />
           <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">{node.name}</span>
-          <span className="block truncate text-xs text-muted-foreground">
+            <span className="block truncate text-sm font-medium">{node.name}</span>
+            <span className="block truncate text-xs text-muted-foreground">
               {node.employeeId} - {node.department} - {node.designation}
-          </span>
+            </span>
           </span>
         </button>
         <div className="hidden items-center gap-2 sm:flex">
@@ -72,7 +72,7 @@ function OrganizationTreeNodeComponent({
       </div>
 
       {hasReportees && isExpanded ? (
-        <div className="ml-5 space-y-2 border-l pl-4">
+        <div className="ml-3 space-y-2 border-l pl-3 sm:ml-5 sm:pl-4">
           {node.reportees.map((reportee) => (
             <OrganizationTreeNodeView
               key={reportee.id}

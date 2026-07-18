@@ -119,13 +119,17 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg tracking-normal">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base tracking-normal sm:text-lg">
           {mode === "create" ? "Create Employee" : "Edit Employee"}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form className="grid gap-5 lg:grid-cols-2" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <form
+          className="grid gap-4 sm:gap-5 lg:grid-cols-2"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" {...register("name")} aria-invalid={Boolean(errors.name)} />
@@ -266,7 +270,7 @@ export function EmployeeForm({ employee, isSubmitting, mode, onSubmit }: Employe
           </div>
 
           <div className="flex justify-end gap-2 lg:col-span-2">
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
               {mode === "create" ? "Create Employee" : "Save Changes"}
             </Button>

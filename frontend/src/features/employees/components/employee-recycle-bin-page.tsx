@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   EMPLOYEE_PAGE_SIZES,
   EMPLOYEE_ROLES,
@@ -154,21 +155,21 @@ export function EmployeeRecycleBinPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-normal">Recycle Bin</h1>
+          <h1 className="text-xl font-semibold tracking-normal sm:text-2xl">Recycle Bin</h1>
           <p className="text-sm text-muted-foreground">
             Restore soft-deleted employees or permanently delete records.
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
           <Link href="/employees">Back to Employees</Link>
         </Button>
       </div>
 
       <Card>
-        <CardContent className="grid gap-4 p-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
+        <CardContent className="grid gap-3 p-3 sm:grid-cols-2 sm:gap-4 sm:p-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
           <div className="space-y-2">
             <Label htmlFor="recycle-search">Search</Label>
             <div className="relative">
@@ -281,14 +282,15 @@ export function EmployeeRecycleBinPage() {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-background p-4">
+      <div className="flex flex-col justify-between gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:items-center">
         <p className="text-sm text-muted-foreground">
           {selectedCount > 0 ? `${selectedCount} selected` : "No rows selected"}
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid gap-2 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap">
           <Button
             type="button"
             variant="outline"
+            className="w-full justify-center sm:w-auto"
             disabled={selectedCount === 0 || isPending}
             onClick={() => setPendingAction({ type: "restore" })}
           >
@@ -298,6 +300,7 @@ export function EmployeeRecycleBinPage() {
           <Button
             type="button"
             variant="destructive"
+            className="w-full justify-center sm:w-auto"
             disabled={selectedCount === 0 || isPending}
             onClick={() => setPendingAction({ type: "delete" })}
           >
@@ -307,7 +310,80 @@ export function EmployeeRecycleBinPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="space-y-3 lg:hidden">
+        {deletedEmployeesQuery.isLoading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton className="h-36 w-full" key={index} />
+          ))
+        ) : employees.length > 0 ? (
+          employees.map((employee) => (
+            <article className="rounded-lg border bg-background p-3 shadow-sm" key={employee.id}>
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  checked={selectedIds.has(employee.id)}
+                  className="mt-1 size-5"
+                  onChange={() => toggleEmployee(employee.id)}
+                  aria-label={`Select ${employee.name}`}
+                />
+                <EmployeeAvatar employee={employee} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-sm font-semibold">{employee.name}</h2>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {employee.employeeId} - {employee.department}
+                      </p>
+                    </div>
+                    <Badge variant={employee.status === "ACTIVE" ? "success" : "warning"}>
+                      {employee.status}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 break-all text-xs text-muted-foreground">{employee.email}</p>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-end justify-between gap-3 border-t pt-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium uppercase text-muted-foreground">
+                    Deleted At
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {employee.deletedAt ? formatEmployeeDate(employee.deletedAt) : "Unknown"}
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-10"
+                    onClick={() => setPendingAction({ employee, type: "restore" })}
+                    aria-label="Restore employee"
+                  >
+                    <RotateCcw className="size-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-10"
+                    onClick={() => setPendingAction({ employee, type: "delete" })}
+                    aria-label="Permanently delete employee"
+                  >
+                    <Trash2 className="size-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-lg border border-dashed bg-background px-4 py-10 text-center text-sm text-muted-foreground">
+            No deleted employees found.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg border bg-background lg:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-left text-sm">
             <thead className="border-b bg-muted/60 text-xs uppercase text-muted-foreground">
@@ -399,14 +475,14 @@ export function EmployeeRecycleBinPage() {
             ? `${pagination.totalRecords} records, page ${pagination.currentPage} of ${pagination.totalPages}`
             : "Loading records"}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="grid w-full grid-cols-[6rem_1fr_1fr] items-center gap-2 sm:flex sm:w-auto">
           <Select
             value={String(limit)}
             onChange={(event) => {
               setLimit(Number(event.target.value));
               resetPage();
             }}
-            className="h-9 w-24"
+            className="h-10 w-full sm:h-9 sm:w-24"
             aria-label="Page size"
           >
             {EMPLOYEE_PAGE_SIZES.map((pageSize) => (
@@ -418,6 +494,7 @@ export function EmployeeRecycleBinPage() {
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             disabled={!pagination?.hasPrevious || deletedEmployeesQuery.isFetching}
             onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
           >
@@ -426,6 +503,7 @@ export function EmployeeRecycleBinPage() {
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             disabled={!pagination?.hasNext || deletedEmployeesQuery.isFetching}
             onClick={() => setPage((currentPage) => currentPage + 1)}
           >

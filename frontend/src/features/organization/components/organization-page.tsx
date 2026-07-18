@@ -22,9 +22,9 @@ export function OrganizationPage() {
   }, []);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-normal">Organization</h1>
+        <h1 className="text-xl font-semibold tracking-normal sm:text-2xl">Organization</h1>
         <p className="text-sm text-muted-foreground">
           View reporting structure, managers, and direct reportees.
         </p>
@@ -36,12 +36,12 @@ export function OrganizationPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Hierarchy</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base tracking-normal sm:text-lg">Hierarchy</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {treeQuery.isLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-16 w-full" />
@@ -71,16 +71,18 @@ export function OrganizationPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg tracking-normal">Employee Details</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base tracking-normal sm:text-lg">Employee Details</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {activeNode ? (
-              <div className="space-y-5">
-                <div className="flex items-center gap-4">
+              <div className="space-y-4 sm:space-y-5">
+                <div className="flex items-center gap-3 sm:gap-4">
                   <EmployeeAvatar employee={activeNode} size="lg" />
                   <div className="min-w-0">
-                    <h2 className="truncate text-lg font-semibold">{activeNode.name}</h2>
+                    <h2 className="truncate text-base font-semibold sm:text-lg">
+                      {activeNode.name}
+                    </h2>
                     <p className="truncate text-sm text-muted-foreground">
                       {activeNode.employeeId} - {activeNode.designation}
                     </p>

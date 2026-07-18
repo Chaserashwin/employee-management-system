@@ -99,14 +99,14 @@ export function EmployeeImportDialog({ isOpen, onClose }: EmployeeImportDialogPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-3 backdrop-blur-sm sm:px-4">
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-lg border bg-background shadow-lg"
+        className="flex max-h-[92vh] w-full max-w-5xl flex-col rounded-lg border bg-background shadow-lg sm:max-h-[90vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="employee-import-title"
       >
-        <div className="flex items-start justify-between gap-3 border-b p-5">
+        <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
           <div>
             <h2 id="employee-import-title" className="text-base font-semibold">
               Import Employees
@@ -115,13 +115,20 @@ export function EmployeeImportDialog({ isOpen, onClose }: EmployeeImportDialogPr
               Upload a CSV, review validation results, then import valid rows.
             </p>
           </div>
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-10 sm:size-9"
+            onClick={onClose}
+            aria-label="Close"
+          >
             <X className="size-4" aria-hidden="true" />
           </Button>
         </div>
 
-        <div className="space-y-4 overflow-y-auto p-5">
-          <div className="flex flex-col gap-3 rounded-md border p-4 md:flex-row md:items-end">
+        <div className="space-y-4 overflow-y-auto p-4 sm:p-5">
+          <div className="flex flex-col gap-3 rounded-md border p-3 sm:p-4 md:flex-row md:items-end">
             <div className="min-w-0 flex-1 space-y-2">
               <Label htmlFor="employee-import-file">CSV file</Label>
               <Input
@@ -134,12 +141,22 @@ export function EmployeeImportDialog({ isOpen, onClose }: EmployeeImportDialogPr
                 }}
               />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={() => void handleTemplateDownload()}>
+            <div className="grid gap-2 min-[420px]:grid-cols-2 md:flex md:flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-center md:w-auto"
+                onClick={() => void handleTemplateDownload()}
+              >
                 <FileDown className="size-4" aria-hidden="true" />
                 Template
               </Button>
-              <Button type="button" disabled={!file || isPending} onClick={() => void handlePreview()}>
+              <Button
+                type="button"
+                className="w-full justify-center md:w-auto"
+                disabled={!file || isPending}
+                onClick={() => void handlePreview()}
+              >
                 {previewMutation.isPending ? (
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                 ) : (
@@ -207,12 +224,19 @@ export function EmployeeImportDialog({ isOpen, onClose }: EmployeeImportDialogPr
           ) : null}
         </div>
 
-        <div className="flex justify-end gap-2 border-t p-5">
-          <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+        <div className="grid gap-2 border-t p-4 sm:flex sm:justify-end sm:p-5">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={onClose}
+            disabled={isPending}
+          >
             Cancel
           </Button>
           <Button
             type="button"
+            className="w-full sm:w-auto"
             disabled={!file || !preview || preview.summary.valid === 0 || isPending}
             onClick={() => void handleImport()}
           >
