@@ -2,6 +2,48 @@
 
 A production-ready full-stack Employee Management System built for a Full Stack Developer hiring assignment. The project is implemented as a TypeScript npm workspace with a Next.js frontend, Express API, MongoDB persistence, JWT authentication, role based access control, employee lifecycle workflows, hierarchy visualization, analytics, CSV import, and deployment-ready configuration.
 
+## Table of Contents
+
+- [Live Demo](#live-demo)
+- [Overview](#overview)
+- [Features](#features)
+- [Assignment Requirements Checklist](#assignment-requirements-checklist)
+- [Tech Stack](#tech-stack)
+- [Folder Structure](#folder-structure)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Backend Setup](#backend-setup)
+  - [Frontend Setup](#frontend-setup)
+  - [Environment Variables](#environment-variables)
+  - [Running Locally](#running-locally)
+  - [Seed Data](#seed-data)
+  - [Production Build](#production-build)
+- [API Documentation](#api-documentation)
+- [Documentation](#documentation)
+  - [API Documentation](docs/API.md)
+  - [Architecture](docs/ARCHITECTURE.md)
+  - [Database Design](docs/DATABASE.md)
+  - [Features](docs/FEATURES.md)
+  - [Deployment Guide](docs/DEPLOYMENT.md)
+  - [Security](docs/SECURITY.md)
+  - [Testing](docs/TESTING.md)
+  - [Assignment Checklist](docs/ASSIGNMENT-CHECKLIST.md)
+  - [Screenshots Guide](docs/SCREENSHOTS.md)
+  - [Changelog](docs/CHANGELOG.md)
+  - [Contributing Guide](docs/CONTRIBUTING.md)
+- [Screenshots](#screenshots)
+  - [Screenshot Index](#screenshot-index)
+  - [Dashboard Light](#dashboard-light)
+  - [Dashboard Dark](#dashboard-dark)
+  - [Employee List](#employee-list)
+  - [Recycle Bin](#recycle-bin)
+  - [Organization Tree](#organization-tree)
+  - [Profile](#profile)
+  - [Settings](#settings)
+  - [Mobile Dashboard](#mobile-dashboard)
+- [Future Improvements](#future-improvements)
+- [License](#license)
+
 ## Live Demo
 
 Frontend URL: Not committed in the repository metadata.
@@ -11,6 +53,8 @@ Local frontend: `http://localhost:4000`
 Local backend health check: `http://localhost:5001/health`
 
 The repository includes deployment configuration for Vercel frontend hosting and Render backend hosting. Add the deployed frontend URL here after retrieving it from the hosting dashboard.
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Overview
 
@@ -23,6 +67,8 @@ The implementation was audited directly from the codebase before documenting:
 - Frontend routes, feature components, services, hooks, providers, and constants in `frontend/src`
 - Deployment files `vercel.json` and `render.yaml`
 - Environment examples in `frontend/.env.example` and `backend/.env.example`
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Features
 
@@ -45,6 +91,8 @@ The implementation was audited directly from the codebase before documenting:
 - Dark Mode: Light, dark, and system theme support through `next-themes`.
 - Charts: Recharts bar, pie, and line charts.
 - Deployment: Vercel frontend configuration, Render backend blueprint, MongoDB Atlas-ready environment variables, and production CORS support.
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Assignment Requirements Checklist
 
@@ -70,6 +118,8 @@ The implementation was audited directly from the codebase before documenting:
 | Charts                    | Implemented | Recharts dashboard chart component                                                                                                   |
 | Deployment                | Implemented | `vercel.json`, `render.yaml`, env examples                                                                                           |
 
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
+
 ## Tech Stack
 
 | Area           | Technology                                                                                 |
@@ -85,6 +135,8 @@ The implementation was audited directly from the codebase before documenting:
 | Validation     | Zod on backend request bodies/query/params and frontend forms                              |
 | Data Fetching  | Axios and TanStack React Query                                                             |
 | Tooling        | npm workspaces, ESLint, Prettier, TypeScript                                               |
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Folder Structure
 
@@ -163,6 +215,8 @@ employee-management-system/
   vercel.json
 ```
 
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
+
 ## Installation
 
 ### Prerequisites
@@ -178,6 +232,8 @@ cd backend
 npm install
 cp .env.example .env
 ```
+
+<a id="environment-variables"></a>
 
 Backend environment variables:
 
@@ -218,6 +274,8 @@ npm run dev
 ```
 
 The frontend runs on `http://localhost:4000`.
+
+<a id="running-locally"></a>
 
 ### Monorepo Setup
 
@@ -273,24 +331,50 @@ Start the compiled backend:
 npm run start --workspace backend
 ```
 
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
+
 ## API Documentation
 
 Complete API documentation is available in [docs/API.md](docs/API.md).
 
-Additional documentation:
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
+## Documentation
+
+- [API Documentation](docs/API.md)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Database](docs/DATABASE.md)
+- [Database Design](docs/DATABASE.md)
 - [Features](docs/FEATURES.md)
-- [Deployment](docs/DEPLOYMENT.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
 - [Security](docs/SECURITY.md)
 - [Testing](docs/TESTING.md)
 - [Assignment Checklist](docs/ASSIGNMENT-CHECKLIST.md)
-- [Screenshots](docs/SCREENSHOTS.md)
+- [Screenshots Guide](docs/SCREENSHOTS.md)
 - [Changelog](docs/CHANGELOG.md)
-- [Contributing](docs/CONTRIBUTING.md)
+- [Contributing Guide](docs/CONTRIBUTING.md)
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Screenshots
+
+### Screenshot Index
+
+Dashboard
+
+- [Dashboard (Light)](#dashboard-light)
+- [Dashboard (Dark)](#dashboard-dark)
+
+Employee Management
+
+- [Employees](#employee-list)
+- [Recycle Bin](#recycle-bin)
+- [Organization Tree](#organization-tree)
+- [Profile](#profile)
+- [Settings](#settings)
+
+Responsive
+
+- [Mobile Dashboard](#mobile-dashboard)
 
 ### Dashboard Light
 
@@ -320,7 +404,13 @@ Additional documentation:
 
 ![Settings](screenshots/settings.png)
 
+### Mobile Dashboard
+
+A dedicated mobile dashboard screenshot was not included in the provided screenshot set. Responsive behavior is documented in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md#responsive-mobile).
+
 See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the complete screenshot catalog.
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
 
 ## Future Improvements
 
@@ -334,6 +424,10 @@ See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the complete screenshot catal
 - Add invite-based onboarding and email notifications.
 - Add CI workflow for lint, test, and build.
 
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
+
 ## License
 
 No standalone license file is present in this repository. Add a license before publishing the project as open-source software.
+
+<sub>[↑ Back to Table of Contents](#table-of-contents)</sub>
