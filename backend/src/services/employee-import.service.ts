@@ -31,10 +31,12 @@ import type {
   EmployeeSummary,
 } from "../types/employee";
 import { AppError } from "../utils/app-error";
+import { createEmployeeCsvDate, parseEmployeeCsvDate } from "../utils/employee-csv-date";
 
 type ValidatedImportRow = EmployeeCsvImportRow & {
   managerEmployeeId: string | null;
   payload: EmployeePayload;
+  parsedJoiningDate: Date | null;
 };
 
 const phoneRegex = /^[0-9+\-\s()]{7,20}$/;
@@ -222,6 +224,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
   const headerIndexes = getEmployeeCsvHeaderIndexes(headerRow);
   const rows: ValidatedImportRow[] = dataRows.map((row, index) => {
     const data = rowToEmployeeData(row, headerIndexes);
+    const parsedJoiningDate = parseEmployeeCsvDate(data.joiningDate);
 
     return {
       data,
@@ -234,7 +237,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
         designation: data.designation,
         email: data.email,
         employeeId: data.employeeId,
-        joiningDate: new Date(data.joiningDate),
+        joiningDate: parsedJoiningDate ?? createEmployeeCsvDate(1970, 1, 1),
         manager: null,
         name: data.name,
         phone: data.phone,
@@ -243,6 +246,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
         salary: Number(data.salary),
         status: data.status as EmployeeStatus,
       },
+      parsedJoiningDate,
       rowNumber: index + 2,
     };
   });
@@ -313,8 +317,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
       row.errors.push("Salary must be a valid non-negative number.");
     }
 
-    const joiningDate = new Date(row.data.joiningDate);
-    if (row.data.joiningDate && Number.isNaN(joiningDate.getTime())) {
+    if (row.data.joiningDate && !row.parsedJoiningDate) {
       row.errors.push("Joining Date must be a valid date.");
     }
 
@@ -322,7 +325,7 @@ const validateImportRows = async (content: string, requester: AuthenticatedUser)
       ...row.payload,
       department: department ?? row.data.department,
       designation: designation ?? row.data.designation,
-      joiningDate,
+      joiningDate: row.parsedJoiningDate ?? row.payload.joiningDate,
       role: (role ?? row.data.role) as EmployeeRole,
       salary,
       status: (status ?? row.data.status) as EmployeeStatus,
